@@ -5,7 +5,7 @@ export function Root({ children }: {
     children: ReactNode
 }) {
     return (
-        <html>
+        <html suppressHydrationWarning>
             {/* eslint-disable-next-line @next/next/no-head-element */}
             <head>
                 <title>java Florist</title>

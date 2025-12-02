@@ -5,7 +5,7 @@
 
 @theme inline {
     --font-content: "Crete Round", sans-serif;
-    --font-header: "Instrument Serif", sans-serif;
+    --font-heading: "Instrument Serif", sans-serif;
     --font-brand: "Instrument Serif", sans-serif;
 
     --radius-sm: calc(var(--radius) - 4px);
@@ -63,7 +63,7 @@
     --accent-foreground: oklch(0.205 0.05 115);
     --destructive: oklch(0.5 0.15 27.325);
     --border: oklch(0.75 0.1 80);
-    --input: oklch(0.922 0 0);
+    --input: oklch(0.75 0.1 80);
     --ring: oklch(0.708 0 0);
     --chart-1: oklch(0.646 0.222 41.116);
     --chart-2: oklch(0.6 0.118 184.704);

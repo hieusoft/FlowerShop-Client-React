@@ -3,7 +3,7 @@ import { Header } from "../components/ui/header";
 import "./globals.css";
 import { Root } from "@/components/layout/root";
 import { ReactNode } from "react";
-import { Providers } from "@/components/layout/providers";
+import { Providers } from "@/components/providers/providers";
 
 export default function Layout({ children }: { 
     children: ReactNode
