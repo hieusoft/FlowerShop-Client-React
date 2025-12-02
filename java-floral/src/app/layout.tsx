@@ -1,12 +1,20 @@
-import Header from "../components/ui/Header";
+import { Footer } from "@/components/ui/footer";
+import { Header } from "../components/ui/header";
+import "./globals.css";
+import { Root } from "@/components/layout/root";
+import { ReactNode } from "react";
+import { Providers } from "@/components/layout/providers";
 
-export default function Layout({ children }) {
+export default function Layout({ children }: { 
+    children: ReactNode
+}) {
   return (
-    <html>
-      <body className="color-bg">
+    <Root>
+      <Providers>
         <Header />
         <main>{children}</main>
-      </body>
-    </html>
+        <Footer />
+      </Providers>
+    </Root>
   )
 }
