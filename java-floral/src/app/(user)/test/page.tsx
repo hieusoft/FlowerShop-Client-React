@@ -21,7 +21,7 @@ import {
   FieldSeparator,
   FieldSet,
 } from "@/components/ui/field";
-import { Hero, HeroContent } from "@/components/ui/hero";
+import { Hero, HeroContent, HeroMedia } from "@/components/ui/hero";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -55,6 +55,15 @@ export default function Page({}) {
             <Button variant={"ghost"}>Ghost</Button>
           </p>
         </HeroContent>
+        <HeroMedia>
+          <picture className="w-full h-full">
+            <img
+              className="w-full h-full object-cover"
+              src="https://placehold.co/500x500"
+              alt=""
+            ></img>
+          </picture>
+        </HeroMedia>
       </Hero>
       <section className="my-10">
         <h2 className="container mx-auto px-8 font-heading text-4xl">

@@ -9,10 +9,14 @@ import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMe
 import { Button } from "../../ui/button";
 import { SearchIcon, ShoppingBasketIcon, UserIcon } from "lucide-react";
 import { Badge } from "../../ui/badge";
+import { Empty, EmptyContent, EmptyHeader } from "@/components/ui/empty";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Header({}) {
 
     const [isScrolled, setIsScrolled] = useState(false);
+    const [isMobileExpanded, setIsMobileExpanded] = useState(false);
+    const isMobile = useIsMobile();
 
     function handleDocumentScroll(event: Event) {
         console.log("scroll event fired");
@@ -44,7 +48,10 @@ export function Header({}) {
                             <Signature />
                         </h1>
                     </Link>
-                    <NavigationMenu className="flex-1 ml-4 max-w-none *:first:w-full">
+                    <NavigationMenu className={cn(
+                        "flex-1 ml-8 max-w-none *:first:w-full",
+                        isMobile ? "hidden" : ""
+                    )}>
                         <NavigationMenuList className="flex-wrap">
                             <NavigationMenuItem>
                                 <NavigationMenuTrigger>Bouquets</NavigationMenuTrigger>
@@ -115,7 +122,7 @@ export function Header({}) {
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
                             <span className="grow"></span>
-                            <Button variant="ghost" className="rounded-full size-10 p-0">
+                            <Button variant="ghost" className="bg-background rounded-full size-10 p-0">
                                 <SearchIcon className="size-5" />
                             </Button>
                             <NavigationMenuItem>
@@ -124,13 +131,22 @@ export function Header({}) {
                                     <span>
                                         <Badge variant="secondary" className="absolute -bottom-1 -right-1 h-5 min-w-5 p-1 tabular-nums">
                                             0
+                                            {/** TODO implement basket / cart */}
                                         </Badge>
                                     </span>
                                 </NavigationMenuTrigger>
                                 <NavigationMenuContent>
                                     <div className="flex md:justify-end md:text-end gap-4 w-full">
                                         <div className="flex flex-col">
-                                            <h3 className="font-heading px-2 py-1 text-2xl">Basket</h3>
+                                            {/** TODO implement basket / cart */}
+                                            <Empty className="gap-2 max-h-none py-0 px-2 md:py-0 md:px-2 items-end *:text-end *:items-end">
+                                                <EmptyHeader className="font-heading text-2xl">
+                                                    Your basket is empty
+                                                </EmptyHeader>
+                                                <EmptyContent>
+                                                    Things you add into your basket will be displayed here.
+                                                </EmptyContent>
+                                            </Empty>
                                         </div>
                                     </div>
                                 </NavigationMenuContent>
