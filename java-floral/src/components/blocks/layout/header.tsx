@@ -4,11 +4,11 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import "tailwindcss";
-import { Signature } from "./signature";
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "./navigation-menu";
-import { Button } from "./button";
+import { Signature } from "../../ui/signature";
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "../../ui/navigation-menu";
+import { Button } from "../../ui/button";
 import { SearchIcon, ShoppingBasketIcon, UserIcon } from "lucide-react";
-import { Badge } from "./badge";
+import { Badge } from "../../ui/badge";
 
 export function Header({}) {
 

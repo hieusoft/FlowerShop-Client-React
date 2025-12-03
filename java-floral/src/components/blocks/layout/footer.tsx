@@ -4,11 +4,11 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import "tailwindcss";
-import { Signature } from "./signature";
+import { Signature } from "../../ui/signature";
 import { FacebookIcon, MailIcon, MapPinIcon, PhoneIcon, Twitter, TwitterIcon } from "lucide-react";
-import { Separator } from "./separator";
+import { Separator } from "../../ui/separator";
 import { SiBluesky, SiFacebook, SiInstagram, SiTumblr, SiX } from "@icons-pack/react-simple-icons";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 
 export function Footer({}) {
     return <>

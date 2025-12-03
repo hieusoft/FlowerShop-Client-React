@@ -1,9 +1,10 @@
-import { Footer } from "@/components/ui/footer";
-import { Header } from "../components/ui/header";
+"use client";
+
 import "./globals.css";
-import { Root } from "@/components/layout/root";
+import { Root } from "@/components/layouts/root";
 import { ReactNode } from "react";
 import { Providers } from "@/components/providers/providers";
+import { GlobalContext } from "@/components/providers/contexts/global-context";
 
 export default function Layout({ children }: { 
     children: ReactNode
@@ -11,9 +12,9 @@ export default function Layout({ children }: {
   return (
     <Root>
       <Providers>
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        <GlobalContext value={{ user: {} }}>
+          {children}
+        </GlobalContext>
       </Providers>
     </Root>
   )

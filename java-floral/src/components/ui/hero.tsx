@@ -25,3 +25,13 @@ export function HeroContent({ className, ...props }: React.ComponentProps<"div">
         </div>
     </>;
 }
+
+export function HeroRedis({ className, ...props }: React.ComponentProps<"div">) {
+    return <>
+        <div className={cn(
+            "container mx-auto px-8 hy-4 flex flex-col gap-4 justify-end py-[calc(8vh+2em)]", 
+            className
+        )} {...props}>
+        </div>
+    </>;
+}
