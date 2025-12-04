@@ -133,9 +133,9 @@ function NavigationMenuViewport({
           "group-data-[orientation=vertical]/navigation-menu:origin-left",
           "group-data-[orientation=horizontal]/navigation-menu:data-[state=closed]:h-0",
           "group-data-[orientation=vertical]/navigation-menu:data-[state=closed]:w-0",
-          "group-data-[orientation=horizontal]/navigation-menu:data-[state=closed]:border-b",
-          "group-data-[orientation=vertical]/navigation-menu:data-[state=closed]:border-l",
-          "relative mt-0 overflow-hidden shadow",
+          "group-data-[orientation=horizontal]/navigation-menu:border-b",
+          "group-data-[orientation=vertical]/navigation-menu:border-l",
+          "relative mt-0 overflow-hidden",
           "group-data-[orientation=horizontal]/navigation-menu:h-(--radix-navigation-menu-viewport-height) group-data-[orientation=horizontal]/navigation-menu:w-dvw",
           "group-data-[orientation=vertical]/navigation-menu:h-full group-data-[orientation=vertical]/navigation-menu:w-full",
           className
