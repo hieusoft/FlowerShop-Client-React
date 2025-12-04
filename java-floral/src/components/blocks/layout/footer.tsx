@@ -12,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 
 export function Footer({}) {
     return <>
-        <footer className="dark bg-background text-foreground mt-auto border-t border-border">
+        <footer className="bg-background text-foreground mt-auto border-t border-border">
             <div className={cn(
                 "container mx-auto flex flex-col px-8 py-8 gap-8 text-sm"
             )}>
