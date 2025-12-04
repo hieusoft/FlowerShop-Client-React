@@ -3,7 +3,7 @@ import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu"
 import { cva } from "class-variance-authority"
 import { ChevronDownIcon } from "lucide-react"
 
-import { cn } from "@/lib/utils"
+import { appendSelector, cn } from "@/lib/utils"
 
 function NavigationMenu({
   className,
@@ -11,7 +11,7 @@ function NavigationMenu({
   viewport = true,
   ...props
 }: React.ComponentProps<typeof NavigationMenuPrimitive.Root> & {
-  viewport?: boolean
+  viewport?: boolean | "custom"
 }) {
   return (
     <NavigationMenuPrimitive.Root
@@ -24,7 +24,7 @@ function NavigationMenu({
       {...props}
     >
       {children}
-      {viewport && <NavigationMenuViewport />}
+      {(viewport === true) && <NavigationMenuViewport />}
     </NavigationMenuPrimitive.Root>
   )
 }
@@ -96,6 +96,7 @@ function NavigationMenuContent({
         "data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52",
         "data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52",
         "absolute top-0 left-[50%] -translate-x-[50%] p-6 pt-2 md:container md:mx-auto",
+        "group-data-[orientation=vertical]/navigation-menu:p-4",
         "group-data-[viewport=false]/navigation-menu:bg-popover group-data-[viewport=false]/navigation-menu:text-popover-foreground",
         "group-data-[viewport=false]/navigation-menu:data-[state=open]:animate-in group-data-[viewport=false]/navigation-menu:data-[state=open]:zoom-in-95",
         "group-data-[viewport=false]/navigation-menu:data-[state=closed]:animate-out group-data-[viewport=false]/navigation-menu:data-[state=closed]:zoom-out-95",
@@ -118,7 +119,9 @@ function NavigationMenuViewport({
   return (
     <div
       className={cn(
-        "absolute top-full left-[50%] -translate-x-[50dvw] w-dvw z-50 flex justify-center"
+        "absolute z-50 flex justify-center",
+        "group-data-[orientation=horizontal]/navigation-menu:top-full group-data-[orientation=horizontal]/navigation-menu:left-[50%] group-data-[orientation=horizontal]/navigation-menu:-translate-x-[50dvw] group-data-[orientation=horizontal]/navigation-menu:w-dvw",
+        "group-data-[orientation=vertical]/navigation-menu:right-full group-data-[orientation=vertical]/navigation-menu:h-full group-data-[orientation=vertical]/navigation-menu:w-[calc(100dvw-4em)]",
       )}
     >
       <NavigationMenuPrimitive.Viewport
@@ -126,9 +129,15 @@ function NavigationMenuViewport({
         className={cn(
           "origin-top-center bg-background text-popover-foreground duration-150 ease-out",
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:fade-in",
-          "data-[state=closed]:h-0",
-          "relative mt-0 overflow-hidden border-b shadow",
-          "h-(--radix-navigation-menu-viewport-height) w-dvw",
+          "group-data-[orientation=horizontal]/navigation-menu:origin-top-center",
+          "group-data-[orientation=vertical]/navigation-menu:origin-left",
+          "group-data-[orientation=horizontal]/navigation-menu:data-[state=closed]:h-0",
+          "group-data-[orientation=vertical]/navigation-menu:data-[state=closed]:w-0",
+          "group-data-[orientation=horizontal]/navigation-menu:data-[state=closed]:border-b",
+          "group-data-[orientation=vertical]/navigation-menu:data-[state=closed]:border-l",
+          "relative mt-0 overflow-hidden shadow",
+          "group-data-[orientation=horizontal]/navigation-menu:h-(--radix-navigation-menu-viewport-height) group-data-[orientation=horizontal]/navigation-menu:w-dvw",
+          "group-data-[orientation=vertical]/navigation-menu:h-full group-data-[orientation=vertical]/navigation-menu:w-full",
           className
         )}
         {...props}

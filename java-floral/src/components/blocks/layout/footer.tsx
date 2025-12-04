@@ -7,7 +7,7 @@ import "tailwindcss";
 import { Signature } from "../../ui/signature";
 import { FacebookIcon, MailIcon, MapPinIcon, PhoneIcon, Twitter, TwitterIcon } from "lucide-react";
 import { Separator } from "../../ui/separator";
-import { SiBluesky, SiFacebook, SiInstagram, SiTumblr, SiX } from "@icons-pack/react-simple-icons";
+import { SiBluesky, SiFacebook, SiInstagram, SiTiktok, SiTumblr, SiX } from "@icons-pack/react-simple-icons";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 
 export function Footer({}) {
@@ -84,6 +84,16 @@ export function Footer({}) {
                                         </TooltipTrigger>
                                         <TooltipContent>
                                             Instagram
+                                        </TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <a href="#">
+                                                <SiTiktok aria-label="TikTok" size={18} title="" />
+                                            </a>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            TikTok
                                         </TooltipContent>
                                     </Tooltip>
                                     <Tooltip>

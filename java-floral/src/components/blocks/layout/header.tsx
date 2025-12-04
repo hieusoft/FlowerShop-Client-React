@@ -2,12 +2,12 @@
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "tailwindcss";
 import { Signature } from "../../ui/signature";
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "../../ui/navigation-menu";
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, NavigationMenuViewport } from "../../ui/navigation-menu";
 import { Button } from "../../ui/button";
-import { SearchIcon, ShoppingBasketIcon, UserIcon } from "lucide-react";
+import { Flower2Icon, MenuIcon, SearchIcon, ShoppingBasketIcon, UserIcon } from "lucide-react";
 import { Badge } from "../../ui/badge";
 import { Empty, EmptyContent, EmptyHeader } from "@/components/ui/empty";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -15,14 +15,35 @@ import { useIsMobile } from "@/hooks/use-mobile";
 export function Header({}) {
 
     const [isScrolled, setIsScrolled] = useState(false);
-    const [isMobileExpanded, setIsMobileExpanded] = useState(false);
+    const [navValue, setNavValue] = useState("");
+
     const isMobile = useIsMobile();
+    const [isMobileExpanded, setIsMobileExpanded] = useState(false);
+
+    const orientation = isMobile ? "vertical" : "horizontal";
+
+    function handleNavValueChange(target: string) {
+        console.log("nav value = " + target)
+        if (isMobile && isMobileExpanded) {
+            setNavValue(target || navValue || "header-bouquets");
+        } else {
+            setNavValue(target);
+        }
+    }
+
+    function handleMobileExpandedChange(target: boolean) {
+        setIsMobileExpanded(target);
+    }
 
     function handleDocumentScroll(event: Event) {
         console.log("scroll event fired");
         const scrollY = document.scrollingElement?.scrollTop ?? 0;
         console.log("scroll event fired", scrollY);
         setIsScrolled(scrollY > 0);
+    }
+
+    function handleMobileExpandedToggle() {
+        setIsMobileExpanded(!isMobileExpanded);
     }
 
     useEffect(() => {
@@ -32,6 +53,17 @@ export function Header({}) {
             window.removeEventListener("scroll", handleDocumentScroll);
         }
     }, [])
+
+    useEffect(() => {
+        if (!isMobile && isMobileExpanded) {
+            setIsMobileExpanded(false);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isMobile])
+
+    useEffect(() => {
+        setNavValue(isMobileExpanded ? "header-bouquets" : "");
+    }, [isMobileExpanded])
 
     return <>
         <header className="sticky top-0 h-24 z-1000">
@@ -48,13 +80,34 @@ export function Header({}) {
                             <Signature />
                         </h1>
                     </Link>
-                    <NavigationMenu className={cn(
-                        "flex-1 ml-8 max-w-none *:first:w-full",
-                        isMobile ? "hidden" : ""
+                    {/* Mobile nav */}
+                    <div className={cn(
+                        "flex gap-2 ml-auto",
+                        isMobile ? "" : "hidden"
                     )}>
-                        <NavigationMenuList className="flex-wrap">
-                            <NavigationMenuItem>
-                                <NavigationMenuTrigger>Bouquets</NavigationMenuTrigger>
+                        <Button variant="ghost" className="bg-background border rounded-full size-12 p-0" onClick={handleMobileExpandedToggle}>
+                            <MenuIcon className="size-5" />
+                        </Button>
+                    </div>
+                    <NavigationMenu className={cn(
+                        "max-w-none",
+                        isMobile 
+                            ? cn(
+                                "fixed h-auto *:first:h-full right-0 top-0 bottom-0 justify-end",
+                                isMobileExpanded ? "" : "pointer-events-none translate-x-full"
+                            )
+                            : "flex-1 ml-8 *:first:w-full transition-[margin,padding]"
+                    )} orientation={orientation} value={navValue} onValueChange={handleNavValueChange} viewport="custom">
+                        <NavigationMenuList className={cn(
+                            "flex-wrap",
+                            isMobile 
+                                ? "h-full flex-col items-center bg-background border-l p-4 gap-2"
+                                : ""
+                        )}>
+                            <NavigationMenuItem value="header-bouquets">
+                                <NavigationMenuTrigger className={isMobile ? "rounded-full size-10 p-0" : ""} hasIcon={!isMobile}>
+                                    {isMobile ? <Flower2Icon className="size-5" /> : "Bouquets"}
+                                </NavigationMenuTrigger>
                                 <NavigationMenuContent>
                                     <div className="flex gap-4 w-max max-w-dvw">
                                         <div className="flex flex-col">
@@ -84,7 +137,9 @@ export function Header({}) {
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
                             <NavigationMenuItem>
-                                <NavigationMenuTrigger>Flowers</NavigationMenuTrigger>
+                                <NavigationMenuTrigger className={isMobile ? "rounded-full size-10 p-0" : ""} hasIcon={!isMobile}>
+                                    {isMobile ? <Flower2Icon className="size-5" /> : "Flowers"}
+                                </NavigationMenuTrigger>
                                 <NavigationMenuContent>
                                     <div className="flex gap-4 w-max max-w-dvw">
                                         <div className="flex flex-col">
@@ -151,7 +206,7 @@ export function Header({}) {
                                     </div>
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
-                            <NavigationMenuItem className="ml-2">
+                            <NavigationMenuItem className={cn(isMobile ? "mt-2" : "ml-2")}>
                                 <NavigationMenuTrigger className="border rounded-full size-12 p-0" hasIcon={false}>
                                     <UserIcon className="size-5" />
                                 </NavigationMenuTrigger>
@@ -178,6 +233,11 @@ export function Header({}) {
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
                         </NavigationMenuList>
+                        <NavigationMenuViewport className={cn(
+                            "transition-[margin] *:transition-all",
+                            isMobile ? "" : (isScrolled ? "*:pb-8" : "border-t *:pt-4 -mt-2")
+                        )}>
+                        </NavigationMenuViewport>
                     </NavigationMenu>
                 </div>
             </div>
