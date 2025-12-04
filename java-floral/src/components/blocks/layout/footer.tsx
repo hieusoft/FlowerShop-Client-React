@@ -2,13 +2,60 @@
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { ForwardRefExoticComponent } from "react";
 import "tailwindcss";
 import { Signature } from "../../ui/signature";
-import { FacebookIcon, MailIcon, MapPinIcon, PhoneIcon, Twitter, TwitterIcon } from "lucide-react";
+import { IconNode, MailIcon, MapPinIcon, PhoneIcon } from "lucide-react";
 import { Separator } from "../../ui/separator";
-import { SiBluesky, SiFacebook, SiInstagram, SiTiktok, SiTumblr, SiX } from "@icons-pack/react-simple-icons";
+import { IconType, SiBluesky, SiFacebook, SiInstagram, SiTiktok, SiTumblr, SiVimeo, SiX, SiYoutube } from "@icons-pack/react-simple-icons";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
+
+const footerSocials: {
+    name: string,
+    icon: IconType,
+    link: string,
+}[] = [
+    {
+        name: "Facebook",
+        icon: SiFacebook,
+        link: "#",
+    },
+    {
+        name: "Bluesky",
+        icon: SiBluesky,
+        link: "#",
+    },
+    {
+        name: "X (formerly Twitter)",
+        icon: SiX,
+        link: "#",
+    },
+    {
+        name: "Instagram",
+        icon: SiInstagram,
+        link: "#",
+    },
+    {
+        name: "YouTube",
+        icon: SiYoutube,
+        link: "#",
+    },
+    {
+        name: "TikTok",
+        icon: SiTiktok,
+        link: "#",
+    },
+    {
+        name: "Vimeo",
+        icon: SiVimeo,
+        link: "#",
+    },
+    {
+        name: "Tumblr",
+        icon: SiTumblr,
+        link: "#",
+    },
+]
 
 export function Footer({}) {
     return <>
@@ -28,17 +75,17 @@ export function Footer({}) {
                         <Separator className="my-4" />
                         <address className="flex flex-col gap-2 *:flex *:items-center *:gap-2 *:pr-4 italic">
                             <span>
-                                <MapPinIcon className="inline-block" size={18} absoluteStrokeWidth={true} aria-label="Address: " />
+                                <MapPinIcon className="inline-block size-5" absoluteStrokeWidth={true} aria-label="Address: " />
                                 Somewhere, Mumbai, India
                             </span>
                             <span>
-                                <PhoneIcon className="inline-block" size={18} absoluteStrokeWidth={true} aria-label="Phone number: " />
+                                <PhoneIcon className="inline-block size-5" absoluteStrokeWidth={true} aria-label="Phone number: " />
                                 <a href="tel:+91 222 222222">
                                     +91 222 222222
                                 </a>
                             </span>
                             <span>
-                                <MailIcon className="inline-block" size={18} absoluteStrokeWidth={true} aria-label="Email: " />
+                                <MailIcon className="inline-block size-5" absoluteStrokeWidth={true} aria-label="Email: " />
                                 <a href="mailto:hello@javaflorist.example.com">
                                     hello@javaflorist.example.com
                                 </a>
@@ -46,66 +93,20 @@ export function Footer({}) {
                             <Separator className="my-3" />
                             <span>
                                 <span className="flex gap-4">
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <a href="#">
-                                                <SiFacebook aria-label="Facebook" size={18} title="" />
-                                            </a>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            Facebook
-                                        </TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <a href="#">
-                                                <SiBluesky aria-label="Bluesky" size={18} title="" />
-                                            </a>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            Bluesky
-                                        </TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <a href="#">
-                                                <SiX aria-label="X (formerly Twitter)" size={18} title="" />
-                                            </a>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            X (formerly Twitter)
-                                        </TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <a href="#">
-                                                <SiInstagram aria-label="Instagram" size={18} title="" />
-                                            </a>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            Instagram
-                                        </TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <a href="#">
-                                                <SiTiktok aria-label="TikTok" size={18} title="" />
-                                            </a>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            TikTok
-                                        </TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <a href="#">
-                                                <SiTumblr aria-label="Tumblr" size={18} title="" />
-                                            </a>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            Tumblr
-                                        </TooltipContent>
-                                    </Tooltip>
+                                    {
+                                        footerSocials.map((social, i) => (
+                                            <Tooltip key={i}>
+                                                <TooltipTrigger asChild>
+                                                    <a href={social.link}>
+                                                        <social.icon aria-label={social.name} className="size-5" title="" />
+                                                    </a>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    {social.name}
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        ))
+                                    }
                                 </span>
                             </span>
                         </address>
