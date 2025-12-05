@@ -25,7 +25,7 @@ apiInstance.interceptors.request.use(
     }
 );
 
-apiInstance.interceptors.request.use(
+apiInstance.interceptors.response.use(
     response => response,
     async (error) => {
         if (error instanceof AxiosError && error.response?.status == 401) {
