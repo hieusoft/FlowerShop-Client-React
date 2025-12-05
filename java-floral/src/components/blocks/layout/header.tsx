@@ -7,7 +7,7 @@ import "tailwindcss";
 import { Signature } from "../../ui/signature";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, NavigationMenuViewport } from "../../ui/navigation-menu";
 import { Button } from "../../ui/button";
-import { AccessibilityIcon, Flower2Icon, MenuIcon, MonitorIcon, MoonIcon, SearchIcon, Settings2Icon, ShoppingBasketIcon, SunIcon, UserIcon } from "lucide-react";
+import { AccessibilityIcon, Flower2Icon, MenuIcon, MonitorIcon, MoonIcon, SearchIcon, Settings2Icon, ShoppingBasketIcon, SunIcon, UserIcon, XIcon } from "lucide-react";
 import { Badge } from "../../ui/badge";
 import { Empty, EmptyContent, EmptyHeader } from "@/components/ui/empty";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -110,6 +110,15 @@ export function Header({}) {
                                 ? "h-full flex-col items-center bg-background border-l p-4 gap-2"
                                 : ""
                         )}>
+                            {/* Mobile nav */}
+                            <div className={cn(
+                                "flex gap-2 ml-auto",
+                                isMobile ? "" : "hidden"
+                            )}>
+                                <Button variant="ghost" className="bg-background rounded-full size-12 p-0" onClick={handleMobileExpandedToggle}>
+                                    <XIcon className="size-5" />
+                                </Button>
+                            </div>
                             <NavigationMenuItem value="header-bouquets">
                                 <NavigationMenuTrigger className={isMobile ? "rounded-full size-10 p-0" : ""} hasIcon={!isMobile}>
                                     {isMobile ? <Flower2Icon className="size-5" /> : "Bouquets"}
