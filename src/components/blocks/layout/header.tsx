@@ -151,46 +151,6 @@ export function Header({}) {
                                     </div>
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
-                            <NavigationMenuItem>
-                                <NavigationMenuTrigger className={isMobile ? "rounded-full size-10 p-0" : ""} hasIcon={!isMobile}>
-                                    {isMobile ? <Flower2Icon className="size-5" /> : "Flowers"}
-                                </NavigationMenuTrigger>
-                                <NavigationMenuContent>
-                                    <div className="flex gap-4 w-max max-w-dvw">
-                                        <div className="flex flex-col">
-                                            <h3 className="font-heading px-2 py-1 text-2xl">Browse our garden</h3>
-                                            <NavigationMenuLink asChild>
-                                                <Link href="/">
-                                                    Flowers for tea
-                                                </Link>
-                                            </NavigationMenuLink>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <h3 className="font-heading px-2 py-1 text-2xl">By species</h3>
-                                            <NavigationMenuLink asChild>
-                                                <Link href="/">
-                                                    Daisies
-                                                </Link>
-                                            </NavigationMenuLink>
-                                            <NavigationMenuLink asChild>
-                                                <Link href="/">
-                                                    Roses
-                                                </Link>
-                                            </NavigationMenuLink>
-                                            <NavigationMenuLink asChild>
-                                                <Link href="/">
-                                                    Chrysanthemums
-                                                </Link>
-                                            </NavigationMenuLink>
-                                            <NavigationMenuLink asChild>
-                                                <Link className="text-muted-foreground italic" href="/">
-                                                    More species...
-                                                </Link>
-                                            </NavigationMenuLink>
-                                        </div>
-                                    </div>
-                                </NavigationMenuContent>
-                            </NavigationMenuItem>
                             <span className="grow"></span>
                             <Button variant="ghost" className="bg-background rounded-full size-10 p-0">
                                 <SearchIcon className="size-5" />
