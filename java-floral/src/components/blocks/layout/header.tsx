@@ -7,10 +7,14 @@ import "tailwindcss";
 import { Signature } from "../../ui/signature";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, NavigationMenuViewport } from "../../ui/navigation-menu";
 import { Button } from "../../ui/button";
-import { Flower2Icon, MenuIcon, SearchIcon, ShoppingBasketIcon, UserIcon } from "lucide-react";
+import { AccessibilityIcon, Flower2Icon, MenuIcon, MonitorIcon, MoonIcon, SearchIcon, Settings2Icon, ShoppingBasketIcon, SunIcon, UserIcon } from "lucide-react";
 import { Badge } from "../../ui/badge";
 import { Empty, EmptyContent, EmptyHeader } from "@/components/ui/empty";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTheme } from "next-themes";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export function Header({}) {
 
@@ -19,6 +23,8 @@ export function Header({}) {
 
     const isMobile = useIsMobile();
     const [isMobileExpanded, setIsMobileExpanded] = useState(false);
+
+    const { theme, setTheme } = useTheme()
 
     const orientation = isMobile ? "vertical" : "horizontal";
 
@@ -194,8 +200,8 @@ export function Header({}) {
                                     <div className="flex md:justify-end md:text-end gap-4 w-full">
                                         <div className="flex flex-col">
                                             {/** TODO implement basket / cart */}
-                                            <Empty className="gap-2 max-h-none py-0 px-2 md:py-0 md:px-2 items-end *:text-end *:items-end">
-                                                <EmptyHeader className="font-heading text-2xl">
+                                            <Empty className="gap-2 max-h-none py-0 px-2 md:py-0 md:px-2 items-start *:text-start *:items-start md:items-end md:*:text-end md:*:items-end">
+                                                <EmptyHeader className="font-heading text-2xl py-1">
                                                     Your basket is empty
                                                 </EmptyHeader>
                                                 <EmptyContent>
@@ -206,12 +212,39 @@ export function Header({}) {
                                     </div>
                                 </NavigationMenuContent>
                             </NavigationMenuItem>
+                            <NavigationMenuItem>
+                                <NavigationMenuTrigger className="rounded-full size-10 p-0" hasIcon={false}>
+                                    <Settings2Icon className="size-5" />
+                                </NavigationMenuTrigger>
+                                <NavigationMenuContent className="flex lg:justify-end lg:text-end">
+                                    <div className="flex flex-col lg:items-end lg:text-end">
+                                        <h3 className="font-heading tracking-tight px-2 py-1 text-2xl">Colors</h3>
+                                        <ToggleGroup 
+                                            className="lg:justify-end px-2 mt-2"
+                                            type="single" variant="outline" value={theme} onValueChange={setTheme}
+                                        >
+                                            <ToggleGroupItem value="system">
+                                                <MonitorIcon />
+                                                Auto
+                                            </ToggleGroupItem>
+                                            <ToggleGroupItem value="light">
+                                                <SunIcon />
+                                                Light
+                                            </ToggleGroupItem>
+                                            <ToggleGroupItem value="dark">
+                                                <MoonIcon />
+                                                Dark
+                                            </ToggleGroupItem>
+                                        </ToggleGroup>
+                                    </div>
+                                </NavigationMenuContent>
+                            </NavigationMenuItem>
                             <NavigationMenuItem className={cn(isMobile ? "mt-2" : "ml-2")}>
                                 <NavigationMenuTrigger className="border rounded-full size-12 p-0" hasIcon={false}>
                                     <UserIcon className="size-5" />
                                 </NavigationMenuTrigger>
                                 <NavigationMenuContent>
-                                    <div className="flex md:justify-end md:text-end gap-4 w-full">
+                                    <div className="flex lg:justify-end lg:text-end gap-4 w-full">
                                         <div className="px-2 text-sm">
                                             <p className="max-w-80">
                                                 Sign up for an account and get extra features and exclusive discounts!
