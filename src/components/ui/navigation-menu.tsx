@@ -120,9 +120,9 @@ function NavigationMenuViewport({
   return (
     <div
       className={cn(
-        "absolute z-50 flex justify-center",
-        "group-data-[orientation=horizontal]/navigation-menu:top-full group-data-[orientation=horizontal]/navigation-menu:left-[50%] group-data-[orientation=horizontal]/navigation-menu:-translate-x-[50dvw] group-data-[orientation=horizontal]/navigation-menu:w-dvw",
-        "group-data-[orientation=vertical]/navigation-menu:right-full group-data-[orientation=vertical]/navigation-menu:h-full group-data-[orientation=vertical]/navigation-menu:w-[calc(100dvw-5em)]",
+        "z-50 flex justify-center",
+        "group-data-[orientation=horizontal]/navigation-menu:absolute group-data-[orientation=horizontal]/navigation-menu:top-full group-data-[orientation=horizontal]/navigation-menu:left-[50%] group-data-[orientation=horizontal]/navigation-menu:-translate-x-[50dvw] group-data-[orientation=horizontal]/navigation-menu:w-dvw",
+        "group-data-[orientation=vertical]/navigation-menu:fixed group-data-[orientation=vertical]/navigation-menu:inset-0 group-data-[orientation=vertical]/navigation-menu:right-20 group-data-[orientation=vertical]/navigation-menu:h-full group-data-[orientation=vertical]/navigation-menu:w-[calc(100%-5em-1px)]",
       )}
     >
       <NavigationMenuPrimitive.Viewport
