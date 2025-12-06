@@ -1,6 +1,6 @@
 import axios, { AxiosError } from "axios";
 
-export const BASE_URL = "";
+export const BASE_URL = "http://13.212.233.95:8080";
 export const ACCESS_TOKEN_KEY = "auth-access-token";
 
 export const apiInstance = axios.create({
@@ -42,4 +42,4 @@ apiInstance.interceptors.response.use(
             return Promise.reject(error);
         }
     }
-)
+);
