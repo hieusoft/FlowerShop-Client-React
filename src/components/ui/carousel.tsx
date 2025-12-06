@@ -120,7 +120,7 @@ function Carousel({
     >
       <div
         onKeyDownCapture={handleKeyDown}
-        className={cn("relative", className)}
+        className={cn("@container/carousel relative", className)}
         role="region"
         aria-roledescription="carousel"
         data-slot="carousel"
@@ -142,8 +142,8 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
       className={cn(
         "overflow-hidden",
         orientation === "horizontal" 
-          ? "mx-12 md:mx-16 lg:mx-24" 
-          : "my-12 md:my-16 lg:my-24",
+          ? "mx-12 @3xl/carousel:mx-16 @5xl/carousel:mx-24" 
+          : "my-12 @3xl/carousel:my-16 @5xl/carousel:my-24",
       )}>
       <div
         className={cn(
@@ -195,8 +195,8 @@ function CarouselPrevious({
       className={cn(
         "absolute rounded-none",
         orientation === "horizontal"
-          ? "w-12 md:w-16 md:pl-4 lg:w-24 lg:pl-12 h-full inset-y-0 border-0 border-r"
-          : "h-12 md:h-16 md:pt-4 lg:w-24 lg:pt-12 w-full inset-x-0 border-0 border-b",
+          ? "w-12 @3xl/carousel:w-16 @3xl/carousel:pl-4 @5xl/carousel:w-24 @5xl/carousel:pl-12 h-full inset-y-0 border-0 border-r"
+          : "h-12 @3xl/carousel:h-16 @3xl/carousel:pt-4 @5xl/carousel:w-24 @5xl/carousel:pt-12 w-full inset-x-0 border-0 border-b",
         className
       )}
       disabled={!canScrollPrev}
@@ -225,8 +225,8 @@ function CarouselNext({
       className={cn(
         "absolute rounded-none",
         orientation === "horizontal"
-          ? "w-12 md:w-16 md:pr-4 lg:w-24 lg:pr-12 h-full right-0 inset-y-0 border-0 border-l"
-          : "h-12 md:h-16 md:pl-4 lg:h-24 lg:pl-12 w-full bottom-0 inset-x-0 border-0 border-t",
+          ? "w-12 @3xl/carousel:w-16 @3xl/carousel:pr-4 @5xl/carousel:w-24 @5xl/carousel:pr-12 h-full right-0 inset-y-0 border-0 border-l"
+          : "h-12 @3xl/carousel:h-16 @3xl/carousel:pl-4 @5xl/carousel:h-24 @5xl/carousel:pl-12 w-full bottom-0 inset-x-0 border-0 border-t",
         className
       )}
       disabled={!canScrollNext}
