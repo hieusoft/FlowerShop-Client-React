@@ -8,13 +8,29 @@ import React from "react";
 export default function VerifyPage() {
     const searchParams = useSearchParams(); 
     const user = searchParams.get("user");
+
     const [message, setMessage] = React.useState("");
+    const [cooldown, setCooldown] = React.useState(0); 
 
     const handleResend = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (cooldown > 0) return;
+
         try {
             await AuthService.ResendVerificationEmail(user || "");
             setMessage("Verification email has been sent!");
+            setCooldown(60);
+
+            const interval = setInterval(() => {
+                setCooldown(prev => {
+                    if (prev <= 1) {
+                        clearInterval(interval);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+
         } catch (error) {
             console.error("Resend verification email failed", error);
             setMessage("Resend failed. Please try again.");
@@ -32,7 +48,9 @@ export default function VerifyPage() {
                 </CardHeader>
                 <CardContent className="mt-4">
                     <form onSubmit={handleResend}>
-                        <Button type="submit">Resend</Button>
+                        <Button type="submit" disabled={cooldown > 0}>
+                            {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend"}
+                        </Button>
                     </form>
                     {message && <p className="mt-2 text-sm text-green-600">{message}</p>}
                 </CardContent>
