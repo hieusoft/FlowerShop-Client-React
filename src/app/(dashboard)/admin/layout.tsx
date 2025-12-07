@@ -1,7 +1,10 @@
 "use client";
 
-import { ShipperSidebar } from "@/components/blocks/dashboard/shipper-sidebar";
+import "../globals.css";
+import { AdminSidebar } from "@/components/blocks/dashboard/admin-sidebar";
+import { Root } from "@/components/layouts/root"
 import { AdminContext } from "@/components/providers/contexts/admin-context"
+import { Providers } from "@/components/providers/providers"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { ReactNode } from "react"
 
@@ -11,7 +14,7 @@ export default function Layout({ children }: {
   return (
     <AdminContext value={{}}>
         <SidebarProvider>
-            <ShipperSidebar />
+            <AdminSidebar />
             <SidebarInset>
               {children}
             </SidebarInset>
