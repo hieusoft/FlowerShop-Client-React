@@ -1,28 +1,58 @@
 "use client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import AuthService from "@/lib/AuthService";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { AlertCircleIcon } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 // TODO Implement page
 export default function ResetPasswordPage({
     className,
     ...props
 }: React.ComponentProps<"div">) {
+    const searchParams = useSearchParams();
+    let rawToken = searchParams.get("token") || "";
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
-    const handleRessetPass = (e: React.FormEvent) => {
+    const [checkingToken, setCheckingToken] = useState(true);
+    const router = useRouter();
+    rawToken = rawToken.replace(/ /g, "+");
+    const token = decodeURIComponent(rawToken);
+
+    useEffect(() => {
+        ;
+        if (!token) {
+            router.replace("/");
+        } else {
+            setCheckingToken(false);
+        }
+    }, [router]);
+
+    if (checkingToken) {
+        return null;
+    }
+
+    const handleRessetPass = async (e: React.FormEvent) => {
         e.preventDefault();
         if (newPassword !== confirmPassword) {
             setError("Passwords do not match");
             return;
         }
         setError("");
-        console.log("Resetting password to:", newPassword);
+        try {
+            await AuthService.ResetPassword(token, newPassword);
+            setError("");
+        } catch (err: any) {
+            setError("Failed to reset password. Please try again.");
+        }
     };
+
     return <div className={cn("flex flex-col gap-6", className)} {...props}>
         <Card>
             <CardHeader>
@@ -45,7 +75,12 @@ export default function ResetPasswordPage({
                             <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="confirm-password" required />
                         </Field>
                     </FieldGroup>
-                    {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+                    {error && (
+                        <Alert variant="destructive" className="mt-2">
+                            <AlertCircleIcon />
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                    )}
                     <Field className="mt-4">
                         <Button>Reset Password</Button>
                     </Field>

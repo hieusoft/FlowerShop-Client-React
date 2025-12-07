@@ -1,16 +1,20 @@
 "use client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field } from "@/components/ui/field";
 import AuthService from "@/lib/AuthService";
+import { AlertCircleIcon, CheckCircle2Icon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import React from "react";
 
 export default function VerifyPage() {
-    const searchParams = useSearchParams(); 
+    const searchParams = useSearchParams();
     const user = searchParams.get("user");
 
-    const [message, setMessage] = React.useState("");
-    const [cooldown, setCooldown] = React.useState(0); 
+    const [success, setSuccess] = React.useState("");
+    const [error, setError] = React.useState("");
+    const [cooldown, setCooldown] = React.useState(0);
 
     const handleResend = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -18,7 +22,8 @@ export default function VerifyPage() {
 
         try {
             await AuthService.ResendVerificationEmail(user || "");
-            setMessage("Verification email has been sent!");
+            setSuccess("Verification email has been sent!");
+            setError("");
             setCooldown(60);
 
             const interval = setInterval(() => {
@@ -33,7 +38,8 @@ export default function VerifyPage() {
 
         } catch (error) {
             console.error("Resend verification email failed", error);
-            setMessage("Resend failed. Please try again.");
+            setError("Resend failed. Please try again.");
+            setSuccess("");
         }
     }
 
@@ -48,11 +54,26 @@ export default function VerifyPage() {
                 </CardHeader>
                 <CardContent className="mt-4">
                     <form onSubmit={handleResend}>
-                        <Button type="submit" disabled={cooldown > 0}>
-                            {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend"}
-                        </Button>
+                        {success && <Alert className="mt-2">
+                            <CheckCircle2Icon />
+                            <AlertDescription>
+                                {success}
+                            </AlertDescription>
+                        </Alert>}
+                        {error && (
+                            <Alert variant="destructive" className="mt-2">
+                                <AlertCircleIcon />
+                                <AlertDescription>{error}</AlertDescription>
+                            </Alert>
+                        )}
+                        <Field className="mt-2">
+                            <Button type="submit" disabled={cooldown > 0}>
+                                {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend"}
+                            </Button>
+                        </Field>
+
                     </form>
-                    {message && <p className="mt-2 text-sm text-green-600">{message}</p>}
+
                 </CardContent>
             </Card>
         </div>

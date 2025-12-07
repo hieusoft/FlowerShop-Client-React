@@ -1,4 +1,5 @@
 "use client"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -16,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { apiInstance } from "@/lib/api"
 import AuthService from "@/lib/AuthService"
+import { AlertCircleIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -31,6 +33,12 @@ export default function RegisterPage({ ...props }: React.ComponentProps<typeof C
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const usernameRegex = /^[A-Za-z0-9]{6,25}$/;
+
+      if (!usernameRegex.test(username)) {
+        setError("Username must be 6–25 characters long and cannot contain spaces or special characters.");
+        return;
+      }
       if (password !== confirmPassword) {
         setError("Passwords do not match");
         return;
@@ -42,7 +50,7 @@ export default function RegisterPage({ ...props }: React.ComponentProps<typeof C
 
       await AuthService.Register(fullname, username, email, password);
       setError("");
-      router.push("/verify-email");
+      router.push(`/verify-email?user=${encodeURIComponent(email)}`);
 
     } catch (error) {
       console.error("Registration failed", error);
@@ -117,7 +125,12 @@ export default function RegisterPage({ ...props }: React.ComponentProps<typeof C
               <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="confirm-password" required />
               <FieldDescription>Please confirm your password.</FieldDescription>
             </Field>
-            {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+            {error && (
+              <Alert variant="destructive" className="mt-2">
+                <AlertCircleIcon />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             <FieldGroup>
               <Field>
                 <Button type="submit">Create Account</Button>

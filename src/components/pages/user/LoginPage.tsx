@@ -19,6 +19,8 @@ import { setAccessToken } from "@/lib/api"
 import AuthService from "@/lib/AuthService"
 import React from "react"
 import { useRouter } from "next/navigation";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { AlertCircleIcon } from "lucide-react"
 
 
 
@@ -37,7 +39,7 @@ export default function LoginPage({
   React.useEffect(() => {
     const token = localStorage.getItem("auth-access-token");
     if (token) {
-      router.replace("/"); 
+      router.replace("/");
     } else {
       setCheckingToken(false);
     }
@@ -112,7 +114,14 @@ export default function LoginPage({
                   required
                 />
               </Field>
-              {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+
+              {error && (
+                <Alert variant="destructive" className="mt-2">
+                  <AlertCircleIcon />
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
               <Field>
                 <Button type="submit">Login</Button>
                 <Button variant="outline" type="button">
