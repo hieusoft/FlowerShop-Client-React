@@ -14,18 +14,21 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Route } from "lucide-react"
+import { apiInstance } from "@/lib/api"
+import AuthService from "@/lib/AuthService"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 export default function RegisterPage({ ...props }: React.ComponentProps<typeof Card>) {
+  const [fullname, setFullname] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (password !== confirmPassword) {
@@ -36,8 +39,10 @@ export default function RegisterPage({ ...props }: React.ComponentProps<typeof C
         setError("Password must be at least 8 characters long");
         return;
       }
+
+      await AuthService.Register(fullname, username, email, password);
       setError("");
-      router.push("/login");
+      router.push("/verify-email");
 
     } catch (error) {
       console.error("Registration failed", error);
@@ -62,8 +67,26 @@ export default function RegisterPage({ ...props }: React.ComponentProps<typeof C
         <form onSubmit={handleRegister}>
           <FieldGroup className="mt-4">
             <Field>
-              <FieldLabel htmlFor="name">Full Name</FieldLabel>
-              <Input id="name" type="text" placeholder="John Doe" required />
+              <FieldLabel htmlFor="fullname">Full Name</FieldLabel>
+              <Input
+                id="fullname"
+                type="text"
+                placeholder="Enter your full name"
+                value={fullname}
+                onChange={(e) => setFullname(e.target.value)}
+                required
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="username">Username</FieldLabel>
+              <Input
+                id="username"
+                type="text"
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
             </Field>
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -71,6 +94,8 @@ export default function RegisterPage({ ...props }: React.ComponentProps<typeof C
                 id="email"
                 type="email"
                 placeholder="m@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
               <FieldDescription>

@@ -15,8 +15,10 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { apiInstance } from "@/lib/api"
+import { setAccessToken } from "@/lib/api"
+import AuthService from "@/lib/AuthService"
 import React from "react"
+import { useRouter } from "next/navigation";
 
 
 
@@ -25,21 +27,25 @@ export default function LoginPage({
   ...props
 }: React.ComponentProps<"div">) {
 
-  const [email, setEmail] = React.useState("");
+  const [emailOrUsername, setEmailOrUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault();
     try {
-      const res = await apiInstance.post("/auth/login", {
-        email,
-        password
-      });
+      const data = await AuthService.Login(emailOrUsername, password);
       setError("");
-      console.log(res.data);
-    } catch (error) {
-      console.error("Login failed", error);
+      setAccessToken(data.data.accessToken);
+      console.log("Login successful");
+      router.push("/");
+    } catch (err: any) {
+      if (err?.response?.data?.message === "Email not verified") {
+        router.push(`/verify-email?user=${encodeURIComponent(emailOrUsername)}`);
+        return;
+      }
       setError("Login failed. Please check your credentials and try again.");
     }
   };
@@ -51,20 +57,20 @@ export default function LoginPage({
             <h2 className="font-heading text-2xl">Login to your account</h2>
           </CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Enter your email or username to login to your account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="emailOrUsername">Email or Username</FieldLabel>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="emailOrUsername"
+                  type="text"
+                  placeholder="m@example.com or username"
+                  value={emailOrUsername}
+                  onChange={(e) => setEmailOrUsername(e.target.value)}
                   required
                 />
               </Field>

@@ -1,6 +1,6 @@
 import axios, { AxiosError } from "axios";
 
-export const BASE_URL = "http://13.212.233.95:8080";
+export const BASE_URL = "http://54.254.156.167:8080";
 export const ACCESS_TOKEN_KEY = "auth-access-token";
 
 export const apiInstance = axios.create({
@@ -34,6 +34,7 @@ apiInstance.interceptors.response.use(
                 const refresh = await axios.get("refresh", { baseURL: BASE_URL });
                 const token = refresh.data.accessToken;
                 setAccessToken(token);
+                originalRequest.headers["Authorization"] = `Bearer ${token}`;
                 return apiInstance(originalRequest); 
             } catch (e) {   
                 return Promise.reject(error);
