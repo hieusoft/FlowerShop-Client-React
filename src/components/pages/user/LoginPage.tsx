@@ -31,6 +31,22 @@ export default function LoginPage({
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState("");
   const router = useRouter();
+  const [checkingToken, setCheckingToken] = React.useState(true);
+
+
+  React.useEffect(() => {
+    const token = localStorage.getItem("auth-access-token");
+    if (token) {
+      router.replace("/"); 
+    } else {
+      setCheckingToken(false);
+    }
+  }, [router]);
+
+  if (checkingToken) {
+    return null;
+  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
 
@@ -39,6 +55,9 @@ export default function LoginPage({
       const data = await AuthService.Login(emailOrUsername, password);
       setError("");
       setAccessToken(data.data.accessToken);
+
+      const profile = await AuthService.Profile();
+      console.log("User Profile:", profile.data);
       console.log("Login successful");
       router.push("/");
     } catch (err: any) {
