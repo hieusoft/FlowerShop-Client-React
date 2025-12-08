@@ -1,9 +1,12 @@
 import axios, { AxiosError } from "axios";
 
-export const BASE_URL = "";
+export const BASE_URL = process.env.NEXT_PUBLIC_API_ROOT;
 export const ACCESS_TOKEN_KEY = "auth-access-token";
 
 export const apiInstance = axios.create({
+    baseURL: BASE_URL
+})
+export const serverApiInstance = axios.create({
     baseURL: BASE_URL
 })
 
