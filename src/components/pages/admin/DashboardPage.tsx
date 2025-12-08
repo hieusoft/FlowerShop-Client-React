@@ -128,7 +128,7 @@ const trendsData = [
 
 export default function DashboardPage() {
     return (
-        <DashboardLayout breadcrumb={["Overview"]}>
+        <DashboardLayout breadcrumb={["Admin", "Overview"]}>
             <h2 className="font-heading text-3xl">Notifications</h2>
             <Card className="my-4 py-4 -mx-4 border-x-0 rounded-none">
                 <CardDescription className="text-center">
