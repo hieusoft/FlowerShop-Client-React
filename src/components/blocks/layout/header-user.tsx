@@ -20,7 +20,7 @@ export function HeaderUser (
             <NavigationMenuContent>
                 <div className="flex md:justify-end md:text-end gap-4 w-full">
                     {userBusy ? <>
-                    </> : user.id ? <>
+                    </> : user?.id ? <>
                     </> : <>
                         <div className="px-2 text-sm">
                             <p className="max-w-80">
