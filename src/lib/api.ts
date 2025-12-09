@@ -9,7 +9,7 @@ interface AxiosRequestConfigWithRetry extends InternalAxiosRequestConfig {
 }
 
 export const apiInstance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: "/api/",
   withCredentials: true, 
 });
 export const serverApiInstance = axios.create({
