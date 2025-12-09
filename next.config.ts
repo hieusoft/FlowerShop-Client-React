@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "http://54.254.156.167:8080/:path*", 
+        destination: process.env.NEXT_PUBLIC_API_ROOT + "/:path*", 
       },
     ];
   },

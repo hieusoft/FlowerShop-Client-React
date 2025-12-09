@@ -1,5 +1,3 @@
-"use client";
-
 import { ReactNode } from "react";
 import { UserContext, UserContextProvider } from "@/components/providers/contexts/user-context";
 import { Header } from "@/components/blocks/layout/header";

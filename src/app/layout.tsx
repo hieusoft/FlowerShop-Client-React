@@ -1,5 +1,3 @@
-"use client";
-
 import "./globals.css";
 import { Root } from "@/components/layouts/root";
 import { ReactNode } from "react";

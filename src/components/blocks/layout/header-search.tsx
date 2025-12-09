@@ -7,7 +7,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { ObjectState, useObjectState } from "@/hooks/use-object-state";
 import { SearchIcon } from "lucide-react";
 import { redirect, RedirectType, useParams, usePathname } from "next/navigation";
-import React, { createContext, FormEvent, useContext, useEffect, useState } from "react";
+import React, { createContext, FormEvent, useContext, useEffect } from "react";
 
 const searchDefaultState = {
     query: "",
@@ -53,9 +53,7 @@ export function HeaderSearchTrigger(
 
 
 export function HeaderSearchContent(
-    { } : {
-
-    }
+    // { } : { }
 ) {
     const searchState = useContext(SearchContext);
 

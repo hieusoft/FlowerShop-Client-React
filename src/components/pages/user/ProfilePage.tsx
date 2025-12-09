@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
     
 export default function ProfilePage() {
     const [profile, setProfile] = React.useState(null);
+    const [error, setError] = React.useState(null);
 
     React.useEffect(() => {
         const fetchProfile = async () => {
@@ -12,7 +13,7 @@ export default function ProfilePage() {
                 const response = await AuthService.Profile();
                 setProfile(response.data);
             } catch (error) {
-                console.error("Failed to fetch profile:", error);
+                setError(error.toString());
             }
         };
 
@@ -26,7 +27,7 @@ export default function ProfilePage() {
     return (
         <div>
             <h1>Profile Page</h1>
-            <pre>{JSON.stringify(profile, null, 2)}</pre>
+            <pre>{error || JSON.stringify(profile, null, 2)}</pre>
         </div>
     );
 }

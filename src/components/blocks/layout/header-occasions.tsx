@@ -4,19 +4,11 @@ import { NavigationMenuLink } from "@/components/ui/navigation-menu";
 import { apiInstance, serverApiInstance } from "@/lib/api";
 import { Occasion } from "@/models/occasion";
 import Link from "next/link";
-import { useContext, useEffect, useState } from "react";
 
-export function HeaderOccasions (
-    {}: {}
+export async function HeaderOccasions (
+    // { } : { }
 ) {
-    let { occasions, set } = useContext(UserContext);
-
-    useEffect(() => {
-        (async () => {
-            if (occasions.length == 0)
-                set.occasions((await apiInstance.get("occasions")).data);
-        })();
-    }, [])
+    const occasions = (await serverApiInstance.get("occasions")).data as Occasion[];
 
     return <>
         <h2 className="font-heading px-2 pt-1 pb-4 text-3xl md:sr-only">Occasions</h2>
