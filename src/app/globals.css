@@ -53,10 +53,11 @@
 .light {
   --radius: 0.625rem;
 
-  --background: oklch(0.97 0.04 115);
+  --background: oklch(0.99 0 0);
+
   --foreground: oklch(0.17 0.08 115);
 
-  --card: oklch(0.985 0.03 115);
+  --card: oklch(0.99 0 0);
   --card-foreground: oklch(0.17 0.08 115);
 
   --popover: oklch(0.99 0.03 115);
