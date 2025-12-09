@@ -15,6 +15,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "next-themes";
 import { MonitorIcon } from "lucide-react";
 import { HeaderUser } from "./header-user";
+import { useParams, usePathname } from "next/navigation";
 
 export function HeaderClient(
     { occasions } : {
@@ -24,6 +25,9 @@ export function HeaderClient(
     const [isScrolled, setIsScrolled] = useState(false);
     const [navValue, setNavValue] = useState("");
 
+    const pathname = usePathname();
+    const params = useParams();
+
     const isMobile = useIsMobile();
     const [isMobileExpanded, setIsMobileExpanded] = useState(false);
 
@@ -32,7 +36,6 @@ export function HeaderClient(
     const orientation = isMobile ? "vertical" : "horizontal";
 
     function handleNavValueChange(target: string) {
-        console.log("nav value = " + target)
         if (isMobile && isMobileExpanded) {
             setNavValue(target || navValue || "header-bouquets");
         } else {
@@ -73,6 +76,10 @@ export function HeaderClient(
     useEffect(() => {
         setNavValue(isMobileExpanded ? "header-bouquets" : "");
     }, [isMobileExpanded])
+
+    useEffect(() => {
+        setIsMobileExpanded(false);
+    }, [pathname, params])
 
     return (
         <header className="@container/header sticky top-0 h-24 z-1000">
@@ -148,8 +155,9 @@ export function HeaderClient(
                                         </span>
                                     </NavigationMenuTrigger>
                                     <NavigationMenuContent>
-                                        <div className="flex md:justify-end md:text-end gap-4 w-full">
+                                        <div className="flex flex-col md:flex-row md:justify-end md:text-end gap-4 w-full">
                                             <div className="flex flex-col">
+                                                <h2 className="font-heading px-2 pt-1 pb-4 text-3xl md:sr-only">Basket</h2>
                                                 {/** TODO implement basket / cart */}
                                                 <Empty className="gap-2 max-h-none py-0 px-2 md:py-0 md:px-2 items-start *:text-start *:items-start md:items-end md:*:text-end md:*:items-end">
                                                     <EmptyHeader className="font-heading text-2xl py-1">
@@ -167,8 +175,9 @@ export function HeaderClient(
                                     <NavigationMenuTrigger className="rounded-full size-10 p-0" hasIcon={false}>
                                         <Settings2Icon className="size-5" />
                                     </NavigationMenuTrigger>
-                                    <NavigationMenuContent className="flex lg:justify-end lg:text-end">
-                                        <div className="flex flex-col lg:items-end lg:text-end">
+                                    <NavigationMenuContent className="flex flex-col md:flex-row md:justify-end md:text-end">
+                                        <h2 className="font-heading px-2 pt-1 pb-4 text-3xl md:sr-only">Preferences</h2>
+                                        <div className="flex flex-col md:items-end md:text-end">
                                             <h3 className="font-heading tracking-tight px-2 py-1 text-2xl">Colors</h3>
                                             <ToggleGroup 
                                                 className="lg:justify-end px-2 mt-2"

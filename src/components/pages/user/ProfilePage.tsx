@@ -208,12 +208,6 @@ export default function ProfilePage() {
             <Card className="lg:col-span-1">
               <CardHeader className="text-center">
                 <div className="flex justify-center mb-4">
-                  <Avatar className="h-32 w-32">
-                    <AvatarImage src={profile?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.email}`} />
-                    <AvatarFallback className="text-2xl">
-                      {profile?.name?.charAt(0) || "U"}
-                    </AvatarFallback>
-                  </Avatar>
                 </div>
                 <CardTitle className="text-2xl">{profile?.name || "User"}</CardTitle>
                 <CardDescription>{profile?.role || "Member"}</CardDescription>
