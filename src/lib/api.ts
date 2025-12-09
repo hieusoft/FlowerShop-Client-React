@@ -1,7 +1,6 @@
 
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
-export const BASE_URL = "/api"; 
 export const ACCESS_TOKEN_KEY = "auth-access-token";
 
 interface AxiosRequestConfigWithRetry extends InternalAxiosRequestConfig {
@@ -9,9 +8,12 @@ interface AxiosRequestConfigWithRetry extends InternalAxiosRequestConfig {
 }
 
 export const apiInstance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: "/api/",
   withCredentials: true, 
 });
+export const serverApiInstance = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_ROOT
+})
 
 
 export function setAccessToken(token: string) {

@@ -132,7 +132,7 @@ function Carousel({
   )
 }
 
-function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
+function CarouselContent({ className, full = false, ...props }: React.ComponentProps<"div"> & { full?: boolean }) {
   const { carouselRef, orientation } = useCarousel()
 
   return (
@@ -141,7 +141,7 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="carousel-content"
       className={cn(
         "overflow-hidden",
-        orientation === "horizontal" 
+        full ? "" : orientation === "horizontal" 
           ? "mx-12 @3xl/carousel:mx-16 @5xl/carousel:mx-24" 
           : "my-12 @3xl/carousel:my-16 @5xl/carousel:my-24",
       )}>
