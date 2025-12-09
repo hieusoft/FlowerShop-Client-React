@@ -8,7 +8,9 @@ import { AlertCircleIcon, CheckCircle2Icon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import React from "react";
 
-export default function VerifyPage() {
+export default function VerifyPage({
+    className, ...props
+}: React.ComponentProps<"div">) {
     const searchParams = useSearchParams();
     const user = searchParams.get("user");
 
