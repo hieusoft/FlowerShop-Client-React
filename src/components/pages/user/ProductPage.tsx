@@ -10,7 +10,7 @@ import {
     PaginationLink,
     PaginationNext
 } from "@/components/ui/pagination";
-import ProductService from "@/lib/ProductService";
+import ProductService from "@/lib/api/ProductService";
 import { Checkbox } from "@radix-ui/react-checkbox";
 import { Label } from "@radix-ui/react-label";
 import { RadioGroup, RadioGroupItem } from "@radix-ui/react-radio-group";
@@ -29,7 +29,7 @@ export default function ProductPage() {
 
 
     const fetchProducts = async (pageNumber: number) => {
-        const res = await ProductService.GetAllProducts({
+        const res = await ProductService.list({
             page: pageNumber,
             limit: limit,
             subOccasionId: id,

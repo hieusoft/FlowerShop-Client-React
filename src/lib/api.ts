@@ -7,7 +7,7 @@ interface AxiosRequestConfigWithRetry extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
-export const apiInstance = axios.create({
+export const clientApiInstance = axios.create({
   baseURL: "/api/",
   withCredentials: true, 
 });
@@ -15,20 +15,35 @@ export const serverApiInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_ROOT
 })
 
+export function getApiInstance() {
+  try {
+    // Test for client
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    window;
+    return clientApiInstance;
+  } catch {
+    return serverApiInstance;
+  }
+}
 
 export function setAccessToken(token: string) {
   localStorage.setItem(ACCESS_TOKEN_KEY, token);
-  apiInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  clientApiInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 }
 
+export function getUserClaims(): null | Record<string, string> {
+  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+  if (!token) return null;
+  return JSON.parse(atob(token.split(".")[1]));
+}
 
 export function removeAccessToken() {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
-  delete apiInstance.defaults.headers.common["Authorization"];
+  delete clientApiInstance.defaults.headers.common["Authorization"];
 }
 
 
-apiInstance.interceptors.request.use(
+clientApiInstance.interceptors.request.use(
   (request) => {
     const token = localStorage.getItem(ACCESS_TOKEN_KEY);
     if (token) {
@@ -41,7 +56,7 @@ apiInstance.interceptors.request.use(
 );
 
 
-apiInstance.interceptors.response.use(
+clientApiInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     if (error.response?.status === 401) {
@@ -63,7 +78,7 @@ apiInstance.interceptors.response.use(
         originalRequest.headers = originalRequest.headers || {};
         originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
 
-        return apiInstance(originalRequest);
+        return clientApiInstance(originalRequest);
       } catch (e) {
         removeAccessToken();
         return Promise.reject(e);

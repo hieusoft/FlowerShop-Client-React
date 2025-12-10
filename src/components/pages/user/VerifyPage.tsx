@@ -3,7 +3,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
-import AuthService from "@/lib/AuthService";
+import AuthService from "@/lib/api/AuthService";
 import { AlertCircleIcon, CheckCircle2Icon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import React from "react";
@@ -23,7 +23,7 @@ export default function VerifyPage({
         if (cooldown > 0) return;
 
         try {
-            await AuthService.ResendVerificationEmail(user || "");
+            await AuthService.resendVerificationEmail(user || "");
             setSuccess("Verification email has been sent!");
             setError("");
             setCooldown(60);

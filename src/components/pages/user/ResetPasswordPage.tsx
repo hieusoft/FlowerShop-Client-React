@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import AuthService from "@/lib/AuthService";
+import AuthService from "@/lib/api/AuthService";
 import { cn } from "@/lib/utils";
 import { AlertCircleIcon } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -46,7 +46,7 @@ export default function ResetPasswordPage({
         }
         setError("");
         try {
-            await AuthService.ResetPassword(token, newPassword);
+            await AuthService.resetPassword(token, newPassword);
             setError("");
         } catch (err: any) {
             setError("Failed to reset password. Please try again.");

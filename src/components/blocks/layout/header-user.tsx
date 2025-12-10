@@ -4,6 +4,8 @@ import { NavigationMenuContent, NavigationMenuItem, NavigationMenuTrigger } from
 import { Spinner } from "@/components/ui/spinner";
 import { UserIcon } from "lucide-react";
 import Link from "next/link";
+import { UserAvatar } from "../user/user-avatar";
+import { NavigationMenuLink } from "@radix-ui/react-navigation-menu";
 
 export function HeaderUser (
     { className } : {
@@ -20,7 +22,30 @@ export function HeaderUser (
             <NavigationMenuContent>
                 <div className="flex md:justify-end md:text-end gap-4 w-full">
                     {userBusy ? <>
-                    </> : user?.id ? <>
+                    </> : !!user ? <>
+                        <div className="px-2 text-sm">
+                            <h3 className="font-heading text-2xl py-1">
+                                Welcome, {user?.fullName}!
+                            </h3>
+                            <p className="flex flex-col max-sm:items-stretch md:flex-row md:justify-end mt-4 gap-2">
+                                <NavigationMenuLink asChild>
+                                    <Button variant="secondary" asChild>
+                                        <Link href="/profile">
+                                            Account settings
+                                        </Link>
+                                    </Button>
+                                </NavigationMenuLink>
+                            </p>
+                            <p className="flex flex-col max-sm:items-stretch md:flex-row md:justify-end mt-4 gap-2">
+                                <NavigationMenuLink asChild>
+                                    <Button variant="outline" asChild>
+                                        <Link href="/logout">
+                                            Log out
+                                        </Link>
+                                    </Button>
+                                </NavigationMenuLink>
+                            </p>
+                        </div>
                     </> : <>
                         <div className="px-2 text-sm">
                             <p className="max-w-80">

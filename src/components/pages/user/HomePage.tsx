@@ -1,9 +1,10 @@
-import { BouquetCard } from "@/components/blocks/bouquet/BouquetCard";
+import { BouquetCard } from "@/components/blocks/bouquet/bouquet-card";
 import { HomeCarousel } from "@/components/blocks/home/home-carousel"
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardFooter, CardHeader, CardThumbnail } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { serverApiInstance } from "@/lib/api"
+import OccasionService from "@/lib/api/OccasionService";
 import { Bouquet } from "@/models/bouquet";
 import { PaginateResult } from "@/models/common";
 import { ShoppingBasketIcon } from "lucide-react";
@@ -28,6 +29,8 @@ export default async function HomePage() {
     const cardBasises = "md:basis-1/2 lg:basis-1/3 xl:basis-1/4 2xl:basis-1/5";
 
     const latestBouquets = (await serverApiInstance.get("bouquets")).data as PaginateResult<Bouquet>;
+    const allOccasions = (await OccasionService.list()).data;
+    // const allFlowers = (await serverApiInstance.get("flowers")).data as Occasion[];
 
     return <>
         <div className="max-w-480 mx-auto mb-10">

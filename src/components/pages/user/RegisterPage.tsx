@@ -15,8 +15,8 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { apiInstance } from "@/lib/api"
-import AuthService from "@/lib/AuthService"
+import { clientApiInstance } from "@/lib/api"
+import AuthService from "@/lib/api/AuthService"
 import { AlertCircleIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -48,7 +48,7 @@ export default function RegisterPage({ ...props }: React.ComponentProps<typeof C
         return;
       }
 
-      await AuthService.Register(fullname, username, email, password);
+      await AuthService.register(fullname, username, email, password);
       setError("");
       router.push(`/verify-email?user=${encodeURIComponent(email)}`);
 

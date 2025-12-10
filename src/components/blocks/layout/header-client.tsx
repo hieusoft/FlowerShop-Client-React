@@ -67,6 +67,7 @@ export function HeaderClient(
         if (!isMobile && isMobileExpanded) {
             setIsMobileExpanded(false);
         }
+        setNavValue("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isMobile])
 

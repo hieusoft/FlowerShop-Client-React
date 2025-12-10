@@ -9,7 +9,7 @@ import {
     FieldGroup,
 } from "@/components/ui/field"
 import React from "react"
-import AuthService from "@/lib/AuthService"
+import AuthService from "@/lib/api/AuthService"
 import { AlertCircleIcon, CheckCircle2Icon } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
@@ -25,7 +25,7 @@ export default function ForgotPasswordPage({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
-            await AuthService.ForgotPassword(email);
+            await AuthService.forgotPassword(email);
             setMessage("Reset link sent. Please check your email.");
             setError("");
         } catch (err: any) {

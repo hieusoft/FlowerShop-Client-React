@@ -1,5 +1,6 @@
 import Head from "next/head";
 import { ReactNode } from "react";
+import { Toaster } from "../ui/sonner";
 
 export function Root({ children }: { 
     children: ReactNode
@@ -16,6 +17,7 @@ export function Root({ children }: {
             </head>
             <body className="flex flex-col min-h-lvh">
                 {children}
+                <Toaster />
             </body>
         </html>
     )

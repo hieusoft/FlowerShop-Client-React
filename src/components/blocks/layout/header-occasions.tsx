@@ -1,14 +1,15 @@
 
 import { UserContext } from "@/components/providers/contexts/user-context";
 import { NavigationMenuLink } from "@/components/ui/navigation-menu";
-import { apiInstance, serverApiInstance } from "@/lib/api";
+import { clientApiInstance, serverApiInstance } from "@/lib/api";
+import OccasionService from "@/lib/api/OccasionService";
 import { Occasion } from "@/models/occasion";
 import Link from "next/link";
 
 export async function HeaderOccasions (
     // { } : { }
 ) {
-    const occasions = (await serverApiInstance.get("occasions")).data as Occasion[];
+    const occasions = (await OccasionService.list()).data as Occasion[];
 
     return <>
         <h2 className="font-heading px-2 pt-1 pb-4 text-3xl md:sr-only">Occasions</h2>

@@ -11,7 +11,7 @@ import {
     PaginationNext
 } from "@/components/ui/pagination";
 import { Slider } from "@/components/ui/slider";
-import ProductService from "@/lib/ProductService";
+import ProductService from "@/lib/api/ProductService";
 import { cn } from "@/lib/utils";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -27,7 +27,7 @@ export default function ShopPage() {
     const limit = 12;
 
     const fetchProducts = async (pageNumber: number) => {
-        const res = await ProductService.GetAllProducts({
+        const res = await ProductService.list({
             page: pageNumber,
             limit: limit,
             minPrice: priceRange[0], // filter theo giá

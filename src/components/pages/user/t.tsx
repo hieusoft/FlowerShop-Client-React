@@ -1,5 +1,5 @@
 "use client"
-import AuthService from "@/lib/AuthService"
+import AuthService from "@/lib/api/AuthService"
 import React from "react"
 import { useRouter } from "next/navigation"
 import {
@@ -53,7 +53,7 @@ export default function ProfilePage() {
     const fetchProfile = async () => {
       try {
         setIsLoading(true)
-        const response = await AuthService.Profile()
+        const response = await AuthService.profile()
         setProfile(response.data)
       } catch (error) {
         console.error("Failed to fetch profile:", error)

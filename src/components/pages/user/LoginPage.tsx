@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { setAccessToken } from "@/lib/api"
-import AuthService from "@/lib/AuthService"
+import AuthService from "@/lib/api/AuthService"
 import React from "react"
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -54,11 +54,11 @@ export default function LoginPage({
 
     e.preventDefault();
     try {
-      const data = await AuthService.Login(emailOrUsername, password);
+      const data = await AuthService.login(emailOrUsername, password);
       setError("");
       setAccessToken(data.data.accessToken);
 
-      const profile = await AuthService.Profile();
+      const profile = await AuthService.profile();
       console.log("User Profile:", profile.data);
       console.log("Login successful");
       router.push("/");
