@@ -16,8 +16,8 @@ export function HeaderUser (
 
     return (
         <NavigationMenuItem className={className}>
-            <NavigationMenuTrigger className="border rounded-full size-12 p-0" hasIcon={false}>
-                {userBusy ? <Spinner className="size-5" /> : <UserIcon className="size-5" />}
+            <NavigationMenuTrigger className="border block rounded-full size-12 p-0" hasIcon={false}>
+                {userBusy ? <Spinner className="size-5" /> : <UserAvatar className="size-full" user={user} />}
             </NavigationMenuTrigger>
             <NavigationMenuContent>
                 <div className="flex md:justify-end md:text-end gap-4 w-full">
