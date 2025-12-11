@@ -95,7 +95,7 @@ function NavigationMenuContent({
         "data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out",
         "data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52",
         "data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52",
-        "absolute top-0 left-[50%] -translate-x-[50%] p-6 pt-2 md:container md:mx-auto",
+        "absolute top-0 left-[50%] -translate-x-[50%] p-6 pt-2 md:container md:mx-auto max-h-full md:max-h-100 overflow-y-auto",
         "group-data-[orientation=vertical]/navigation-menu:p-4",
         "group-data-[orientation=vertical]/navigation-menu:w-full",
         "group-data-[viewport=false]/navigation-menu:bg-popover group-data-[viewport=false]/navigation-menu:text-popover-foreground",
@@ -121,7 +121,7 @@ function NavigationMenuViewport({
     <div
       className={cn(
         "z-50 flex justify-center",
-        "group-data-[orientation=horizontal]/navigation-menu:absolute group-data-[orientation=horizontal]/navigation-menu:top-full group-data-[orientation=horizontal]/navigation-menu:left-[50%] group-data-[orientation=horizontal]/navigation-menu:-translate-x-[50dvw] group-data-[orientation=horizontal]/navigation-menu:w-dvw",
+        "group-data-[orientation=horizontal]/navigation-menu:absolute group-data-[orientation=horizontal]/navigation-menu:top-full group-data-[orientation=horizontal]/navigation-menu:left-[50%] group-data-[orientation=horizontal]/navigation-menu:-translate-x-[50cqw] group-data-[orientation=horizontal]/navigation-menu:w-[100cqw]",
         "group-data-[orientation=vertical]/navigation-menu:fixed group-data-[orientation=vertical]/navigation-menu:inset-0 group-data-[orientation=vertical]/navigation-menu:right-20 group-data-[orientation=vertical]/navigation-menu:h-full group-data-[orientation=vertical]/navigation-menu:w-[calc(100%-5em-1px)]",
       )}
     >
@@ -137,7 +137,7 @@ function NavigationMenuViewport({
           "group-data-[orientation=horizontal]/navigation-menu:border-b",
           "group-data-[orientation=vertical]/navigation-menu:border-l",
           "relative mt-0 overflow-hidden",
-          "group-data-[orientation=horizontal]/navigation-menu:h-(--radix-navigation-menu-viewport-height) group-data-[orientation=horizontal]/navigation-menu:w-dvw",
+          "group-data-[orientation=horizontal]/navigation-menu:h-[calc(var(--radix-navigation-menu-viewport-height)+2px)] group-data-[orientation=horizontal]/navigation-menu:w-dvw",
           "group-data-[orientation=vertical]/navigation-menu:h-full group-data-[orientation=vertical]/navigation-menu:w-full",
           className
         )}

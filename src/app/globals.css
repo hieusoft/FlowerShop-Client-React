@@ -53,13 +53,14 @@
 .light {
   --radius: 0.625rem;
 
-  --background: oklch(0.97 0.04 115);
+  --background: oklch(0.99 0.02 115);
+
   --foreground: oklch(0.17 0.08 115);
 
-  --card: oklch(0.985 0.03 115);
+  --card: oklch(0.99 0.01 115);
   --card-foreground: oklch(0.17 0.08 115);
 
-  --popover: oklch(0.99 0.03 115);
+  --popover: oklch(0.99 0.01 115);
   --popover-foreground: oklch(0.18 0.08 115);
 
   --primary: oklch(0.32 0.09 115);
@@ -150,4 +151,10 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@utility auto-fill-* {
+  grid-template-columns: repeat(auto-fill, minmax(min(--value([*]), 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(--value(--text-*), 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(calc(var(--spacing) * --value(integer)), 100%), 1fr));
 }
