@@ -17,7 +17,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MapPin } from "lucide-react";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon, MapPin } from "lucide-react";
+import { format } from "date-fns";
+import { useState } from "react";
 
 interface ShippingAddressStepProps {
   formData: {
@@ -25,6 +35,8 @@ interface ShippingAddressStepProps {
     province: string;
     ward: string;
     note: string;
+    deliveryDate: string;
+    deliveryTime: string;
   };
   onInputChange: (field: string, value: string) => void;
 }
@@ -44,6 +56,15 @@ export default function ShippingAddressStep({
   formData,
   onInputChange,
 }: ShippingAddressStepProps) {
+  const [date, setDate] = useState<Date | undefined>(
+    formData.deliveryDate ? new Date(formData.deliveryDate) : undefined
+  );
+
+  const times = Array.from({ length: 13 }, (_, i) => {
+    const hour = 9 + i; // 9 → 21
+    return `${hour.toString().padStart(2, "0")}:00`;
+  });
+
   return (
     <Card>
       <CardHeader>
@@ -98,6 +119,54 @@ export default function ShippingAddressStep({
             value={formData.ward}
             onChange={(e) => onInputChange("ward", e.target.value)}
           />
+        </div>
+
+        {/* Date Picker */}
+        <div className="space-y-2">
+          <Label>Delivery Date *</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                className="w-full flex items-center justify-between rounded-md border px-3 py-2 text-left text-sm"
+              >
+                {date ? format(date, "dd/MM/yyyy") : "Select delivery date"}
+                <CalendarIcon className="h-4 w-4 opacity-50" />
+              </button>
+            </PopoverTrigger>
+
+            <PopoverContent align="start" className="p-0">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={(day) => {
+                  setDate(day!);
+                  onInputChange("deliveryDate", day!.toISOString());
+                }}
+                disabled={(day) => day < new Date()}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Time Picker */}
+        <div className="space-y-2">
+          <Label>Delivery Time *</Label>
+          <Select
+            value={formData.deliveryTime}
+            onValueChange={(value) => onInputChange("deliveryTime", value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select delivery time" />
+            </SelectTrigger>
+            <SelectContent>
+              {times.map((t) => (
+                <SelectItem key={t} value={t}>
+                  {t}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Note */}

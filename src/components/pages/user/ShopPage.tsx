@@ -1,12 +1,14 @@
 "use client";
+
 import { ProductCard } from "@/components/blocks/product/product-card";
 import { FieldGroup, FieldSet, FieldLegend, Field, FieldSeparator, FieldLabel } from "@/components/ui/field";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
-import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import ProductService from "@/lib/ProductService";
+import ProductService from "@/lib/api/ProductService";
+import OccasionService from "@/lib/api/OccasionService";
 import {
     Pagination,
     PaginationContent,
@@ -18,7 +20,6 @@ import {
 
 export default function ShopPage() {
     const { occasion, suboccasion } = useParams();
-    const router = useRouter();
 
     const [bouquets, setBouquets] = useState<any[]>([]);
     const [occasionData, setOccasionData] = useState<any>(null);
@@ -51,18 +52,23 @@ export default function ShopPage() {
         }
     };
 
+    // Ref để debounce slider
+    const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await ProductService.GetOccasionByName(occasion as string);
+                const res = await OccasionService.fromId(occasion as string);
                 const data = res.data;
+
                 if (!data) {
-                    setBouquets([])
+                    setBouquets([]);
                     return;
                 }
+
                 setOccasionData(data);
 
-                if (suboccasion && data.subOccasions) {
+                if (suboccasion && Array.isArray(data.subOccasions)) {
                     const valid = data.subOccasions.some((sub: any) => sub.name === suboccasion);
                     setIsSuboccasionValid(valid);
                 } else {
@@ -70,25 +76,23 @@ export default function ShopPage() {
                 }
             } catch (error) {
                 console.error(error);
-                setBouquets([])
+                setBouquets([]);
             }
         };
         fetchData();
-    }, [occasion, suboccasion, router]);
-
+    }, [occasion, suboccasion]);
 
     useEffect(() => {
         if (occasionData && !isSuboccasionValid) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setBouquets([])
+            setBouquets([]);
         }
-    }, [occasionData, isSuboccasionValid, router]);
+    }, [occasionData, isSuboccasionValid]);
 
     const fetchBouquets = async (pageNumber: number) => {
         if (!occasionData || !isSuboccasionValid) return;
 
         try {
-            const res = await ProductService.GetAllProducts({
+            const res = await ProductService.list({
                 page: pageNumber,
                 limit,
                 minPrice: priceRange[0],
@@ -96,6 +100,7 @@ export default function ShopPage() {
                 subOccasionName: suboccasion,
                 sortOption: mapSortOption(sortBy),
             });
+
             setBouquets(res.data.data);
             setTotalPages(res.data.totalPages);
             setTotalItems(res.data.totalItems);
@@ -105,9 +110,15 @@ export default function ShopPage() {
     };
 
     useEffect(() => {
-        fetchBouquets(page);
-    }, [page, priceRange, sortBy, occasionData, isSuboccasionValid]);
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            fetchBouquets(page);
+        }, 300);
 
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        };
+    }, [page, priceRange, sortBy, occasionData, isSuboccasionValid]);
 
     return (
         <div className="container mx-auto flex flex-col lg:flex-row mb-20 gap-4">
@@ -173,14 +184,13 @@ export default function ShopPage() {
                     <p className="text-center py-10 text-gray-500">No bouquets found.</p>
                 ) : (
                     <div className="w-full grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
-                        {bouquets.map((bouquet, index) => (
+                        {bouquets.map((bouquet) => (
                             <ProductCard
-                                key={index}
+                                key={bouquet.id || bouquet.product_id}
                                 product={bouquet}
                                 occasion={occasion as string}
                             />
                         ))}
-
                     </div>
                 )}
 

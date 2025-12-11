@@ -126,9 +126,9 @@ export default function OrderSummary() {
   }, []);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("vi-VN", {
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "VND"
+      currency: "USD"
     }).format(amount);
   };
 
@@ -145,11 +145,9 @@ export default function OrderSummary() {
     );
   }
 
-  // Calculate subtotal from cartItems if checkoutData isn't available
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const selectedCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Use checkoutData or fallback values
   const shippingFee = checkoutData?.shippingFee || 0;
   const discount = checkoutData?.discount || 0;
   const tax = checkoutData?.tax || subtotal * 0.08;
@@ -188,7 +186,6 @@ export default function OrderSummary() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Cart items */}
           <div className="space-y-4 mb-6">
             {cartItems.map((item) => (
               <div key={item.id} className="flex gap-3">
@@ -222,7 +219,6 @@ export default function OrderSummary() {
 
           <Separator />
 
-          {/* Coupon Code Display */}
           {checkoutData?.couponCode && (
             <div className="mt-6 space-y-3">
               <div className="flex items-center justify-between bg-gray-50 p-3 rounded">

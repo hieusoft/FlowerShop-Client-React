@@ -13,7 +13,8 @@ interface Recipient {
   userId: number;
   fullName: string;
   addressLine: string;
-  city: string;
+  province: string;
+  ward: string;
   phoneNumber: string;
   isDefault: boolean;
 }
@@ -38,7 +39,7 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
       try {
         setIsLoading(true);
         const data = await RecipientService.fromUser();
-        console.log("Fetched recipients:", data.data); 
+        
         setRecipients(data.data);
 
         const defaultRecipient = data.data.find((recipient: Recipient) => recipient.isDefault);
@@ -87,7 +88,8 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
     onInputChange("phone", recipient.phoneNumber);
     onInputChange("isNew", "false");
     onInputChange("address", recipient.addressLine);
-    onInputChange("province", recipient.city);
+    onInputChange("province", recipient.province);
+    onInputChange("ward", recipient.ward); 
     };
 
   const selectedRecipient = recipients.find(r => r.recipientId === selectedRecipientId);
@@ -111,7 +113,7 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Recipient Dropdown */}
+      
         {!isLoading && recipients.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">

@@ -8,6 +8,16 @@ import OrderSummary from "@/components/blocks/checkout/OrderSummary";
 import { CheckoutFormData } from "../../../models/checkout";
 import SuccessMessage from "@/components/blocks/checkout/SuccessMessage";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 export default function CheckoutPage() {
   const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -17,7 +27,15 @@ export default function CheckoutPage() {
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponError, setCouponError] = useState("");
 
-  
+  // Alert dialog state
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
+  const showAlert = (message: string) => {
+    setAlertMessage(message);
+    setAlertOpen(true);
+  };
+
   const [formData, setFormData] = useState<CheckoutFormData>({
     email: "",
     phone: "",
@@ -26,16 +44,14 @@ export default function CheckoutPage() {
     province: "",
     ward: "",
     note: "",
-    shippingMethod: "standard",
     paymentMethod: "cod",
-    useShippingAddress: true,
     saveInfo: true,
     acceptTerms: false,
     isNew: false,
     giftMessage: "",
+    deliveryDate: "",
+    deliveryTime: "",
   });
-
-  const shippingFee = formData.shippingMethod === "express" ? 50000 : 30000;
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({
@@ -46,7 +62,7 @@ export default function CheckoutPage() {
 
   const handleApplyCoupon = () => {
     if (!couponCode) {
-      setCouponError("Vui lòng nhập mã giảm giá");
+      setCouponError("Please enter a coupon code.");
       return;
     }
 
@@ -54,27 +70,37 @@ export default function CheckoutPage() {
       setCouponApplied(true);
       setCouponError("");
     } else {
-      setCouponError("Mã giảm giá không hợp lệ");
+      setCouponError("Invalid coupon code.");
       setCouponApplied(false);
     }
   };
 
   const handleNextStep = () => {
-    
     if (
       step === 1 &&
-      ( !formData.phone || !formData.fullName || !formData.isNew)
+      (!formData.phone || !formData.fullName || !formData.isNew)
     ) {
-      alert("Vui lòng điền đầy đủ thông tin liên hệ");
+      showAlert("Please complete your contact information.");
       return;
     }
+
     if (
       step === 2 &&
-      (!formData.address || !formData.province )
+      (!formData.address ||
+        !formData.province ||
+        !formData.ward ||
+        !formData.deliveryDate ||
+        !formData.deliveryTime)
     ) {
-      alert("Vui lòng điền đầy đủ thông tin địa chỉ");
+      showAlert("Please complete your shipping address.");
       return;
     }
+
+    if (step === 3 && !formData.giftMessage) {
+      showAlert("Please enter a gift message.");
+      return;
+    }
+
     setStep(step + 1);
   };
 
@@ -83,8 +109,9 @@ export default function CheckoutPage() {
   };
 
   const handlePlaceOrder = async () => {
+    
     if (!formData.acceptTerms) {
-      alert("Vui lòng đồng ý với điều khoản và điều kiện");
+      showAlert("Please accept the terms and conditions.");
       return;
     }
 
@@ -94,6 +121,7 @@ export default function CheckoutPage() {
       const newOrderNumber = `ORD-${Math.floor(
         100000 + Math.random() * 900000
       )}`;
+
       setOrderNumber(newOrderNumber);
       setIsProcessing(false);
       setOrderComplete(true);
@@ -109,7 +137,6 @@ export default function CheckoutPage() {
       <ProgressSteps step={step} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      
         <div className="lg:col-span-2">
           <CheckoutForm
             step={step}
@@ -122,11 +149,9 @@ export default function CheckoutPage() {
           />
         </div>
 
-        {/* Right Column - Order Summary */}
         <div>
           <OrderSummary
             cartItems={[]}
-            shippingFee={shippingFee}
             couponCode={couponCode}
             couponApplied={couponApplied}
             couponError={couponError}
@@ -135,6 +160,22 @@ export default function CheckoutPage() {
           />
         </div>
       </div>
+
+      {/* Alert Dialog */}
+      <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Notification</AlertDialogTitle>
+            <AlertDialogDescription>{alertMessage}</AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setAlertOpen(false)}>
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

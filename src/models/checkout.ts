@@ -6,13 +6,13 @@ export interface CheckoutFormData {
   province: string;
   ward: string;
   note: string;
-  shippingMethod: string;
   paymentMethod: string;
-  useShippingAddress: boolean;
   saveInfo: boolean;
   acceptTerms: boolean;
   isNew: boolean;
   giftMessage: string;
+  deliveryDate: string;
+  deliveryTime: string
 }
 
 export interface CheckoutState {
