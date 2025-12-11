@@ -1,7 +1,9 @@
 import Head from "next/head";
 import { ReactNode } from "react";
+import { Toaster } from "sonner";
 
-export function Root({ children }: { 
+
+export function Root({ children }: {
     children: ReactNode
 }) {
     return (
@@ -16,6 +18,7 @@ export function Root({ children }: {
             </head>
             <body className="flex flex-col min-h-lvh">
                 {children}
+                <Toaster position="top-right" richColors />
             </body>
         </html>
     )
