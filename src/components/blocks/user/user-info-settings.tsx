@@ -11,6 +11,7 @@ import { Recipient } from "@/models/recipient";
 import { toast } from "sonner";
 import UserService from "@/lib/api/UserService";
 import AuthService from "@/lib/api/AuthService";
+import { AxiosError } from "axios";
 
 export function UserInfoSettings() {
     const { user } = useUser();
@@ -18,13 +19,14 @@ export function UserInfoSettings() {
     const [isDeleteAccountOpen, setDeleteAccountOpen] = useState(false);
 
     return (
-        <div className="text-sm *:mb-6 *:*:mb-4 *:*:*:mb-2">
+        <div className="text-sm *:mb-12 *:*:mb-6 *:*:*:mb-3">
             <section>
-                <h3 className="text-3xl font-heading leading-none">Account Information</h3>
+                <h3 className="text-3xl font-heading leading-none">Account information</h3>
                 <UserInfoForm user={user} />
             </section>
             <section>
                 <h3 className="text-3xl font-heading leading-none">Delivery details</h3>
+                <p className="-my-4">We&apos;ll use this info for future orders.</p>
                 <UserRecipientForm user={user} />
             </section>
             <section>
@@ -87,14 +89,14 @@ export function UserInfoForm(
         e.preventDefault();
         setIsBusy(true);
         UserService.update(user!.userId, formState.fullName, formState.email).then(() => {
-            toast("Account info updated successfully");
+            toast.success("Account info updated successfully");
             globals.set.user({
-                ...globals.user,
+                ...globals.user!,
                 fullName: formState.fullName,
                 email: formState.email,
             })
         }).catch((e) => {
-            toast(e.data?.error ?? "Something went wrong")
+            toast.error(e.response?.data?.message ?? "Something went wrong")
         }).finally(() => {
             setIsBusy(false);
         })
@@ -165,9 +167,9 @@ export function UserRecipientForm(
         e.preventDefault();
         setIsBusy(true);
         RecipientService[isNew ? "post" : "put"](formState).then(() => {
-            toast("Delivery info updated successfully")
+            toast.success("Delivery info updated successfully")
         }).catch((e) => {
-            toast(e.data?.error ?? "Something went wrong")
+            toast.error(e.response?.data?.message ?? "Something went wrong")
         }).finally(() => {
             setIsBusy(false);
         })
@@ -178,7 +180,7 @@ export function UserRecipientForm(
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsInit(true);
             setIsBusy(true);
-            RecipientService.fromUser(user.userId).then(({data}) => {
+            RecipientService.fromSelf().then(({data}) => {
                 let defaultRecipient: Recipient | null = null;
                 for (const recipient of data) if (recipient.isDefault) {
                     defaultRecipient = recipient;
@@ -265,10 +267,10 @@ function ChangePasswordDialog({ isOpen, onClose }: { isOpen: boolean; onClose: (
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         AuthService.changePassword(currentPassword, newPassword, newPassword2).then(() => {
-            toast("Changed password successfully");
+            toast.success("Changed password successfully");
             onClose();
         }).catch((e) => {
-            toast(e.data?.error ?? "Something went wrong")
+            toast.error(e.response?.data?.message ?? "Something went wrong")
         }).finally(() => {
             setIsBusy(false);
         })
@@ -330,7 +332,7 @@ function DeleteAccountDialog({ isOpen, onClose }: { isOpen: boolean; onClose: ()
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Delete Account</DialogTitle>
+                    <DialogTitle>Delete account</DialogTitle>
                 </DialogHeader>
                 <p>Are you sure you want to delete your account? This action cannot be undone.</p>
                 <DialogFooter>

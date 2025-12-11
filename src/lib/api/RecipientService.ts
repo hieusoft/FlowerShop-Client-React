@@ -4,18 +4,22 @@ import { clientApiInstance, getApiInstance } from "../api";
 function fromUser(id: number) {
     return getApiInstance().get<Recipient[]>(`/user/${id}/recipients`);
 }
+function fromSelf(id: number) {
+    return getApiInstance().get<Recipient[]>(`/user/recipients`);
+}
 function post(data: Recipient) {
-    return getApiInstance().post(`/user/contacts`);
+    return getApiInstance().post(`/user/recipients`, data);
 }
 function put(data: Recipient) {
-    return getApiInstance().put(`/user/contacts`);
+    return getApiInstance().put(`/user/recipients`, data);
 }
 function deleteOne(id: number) {
-    return getApiInstance().delete(`/user/contacts/${id}`);
+    return getApiInstance().delete(`/user/recipients/${id}`);
 }
 
 export default {
     fromUser,
+    fromSelf,
     post,
     put,
     delete: deleteOne,
