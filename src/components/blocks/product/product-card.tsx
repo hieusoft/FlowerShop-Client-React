@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Search, ShoppingCart } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export function ProductCard({
     product,
@@ -53,7 +54,9 @@ export function ProductCard({
 
         localStorage.setItem("cart", JSON.stringify(cart));
 
-        alert("Đã thêm vào giỏ hàng!");
+        toast.success("Đã thêm vào giỏ hàng 🛒", {
+            description: product.name,
+        });
     };
 
     return (

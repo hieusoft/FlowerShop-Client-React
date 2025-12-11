@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function ProductPage() {
     const router = useRouter();
@@ -112,21 +113,24 @@ export default function ProductPage() {
         );
 
         if (existingIndex !== -1) {
-           
+
             cart[existingIndex].quantity += quantity;
         } else {
-            
+
             cart.push({
                 id: product.id,
                 name: product.name,
-                price: product.price, 
+                price: product.price,
                 image: product.images?.[0],
-                quantity: quantity,  
+                quantity: quantity,
             });
         }
 
         localStorage.setItem("cart", JSON.stringify(cart));
         setQuantity(1);
+        toast.success("Đã thêm vào giỏ hàng 🛒", {
+            description: product.name,
+        });
         window.dispatchEvent(new Event("cartUpdated"));
     };
 
