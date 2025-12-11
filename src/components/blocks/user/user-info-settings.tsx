@@ -186,7 +186,10 @@ export function UserRecipientForm(
                 let defaultRecipient: Recipient | null = null;
                 for (const recipient of data) if (recipient.isDefault) {
                     defaultRecipient = recipient;
-                    for (const prop in recipient) formState.set[prop as keyof Recipient]?.(recipient[prop]);
+                    for (const prop in recipient) {
+                        // @ts-expect-error this should be the same type
+                        formState.set[prop as keyof Recipient]?.(recipient[prop]);
+                    }
                     break;
                 }
                 console.log(defaultRecipient?.recipientId);

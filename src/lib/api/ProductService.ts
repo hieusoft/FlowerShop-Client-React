@@ -1,18 +1,15 @@
-import { clientApiInstance, getApiInstance } from "../api";
+import { getApiInstance } from "../api";
 
+// TODO change param type
 const list = async (params: Record<string, any>) => {
     return getApiInstance().get("/bouquets", { params });
 };
 
-const GetOccasionName = async () => {
-    return getApiInstance().get("/occasions");
-}
-
-const GetOccasionByName = async (name: string) => {
-    return getApiInstance().get(`/occasions/${name}`);
+const fromId = async(id: number | string) => {
+   return getApiInstance().get(`/bouquets/${id}`);
 }
 
 export default {
     list,
-    GetOccasionName
+    fromId,
 };

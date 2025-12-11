@@ -1,5 +1,5 @@
 import { Recipient } from "@/models/recipient";
-import { clientApiInstance, getApiInstance } from "../api";
+import { getApiInstance } from "../api";
 
 function fromUser(id: number) {
     return getApiInstance().get<Recipient[]>(`/user/${id}/recipients`);
@@ -13,7 +13,7 @@ function post(data: Recipient) {
 function put(data: Recipient) {
     return getApiInstance().put(`/user/recipients`, data);
 }
-function deleteOne(id: number) {
+function deleteOne(id: number | string) {
     return getApiInstance().delete(`/user/recipients/${id}`);
 }
 

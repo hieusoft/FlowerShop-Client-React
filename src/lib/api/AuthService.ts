@@ -1,9 +1,9 @@
 // AuthService.ts
 import { User } from "@/models/user";
-import { clientApiInstance, getApiInstance } from "../api";
+import { getApiInstance } from "../api";
 
 const login = async (emailOrUsername: string, password: string) => {
-    return clientApiInstance.post("/auth/login", { emailOrUsername, password });
+    return getApiInstance().post("/auth/login", { emailOrUsername, password });
 };
 
 const register = async (
