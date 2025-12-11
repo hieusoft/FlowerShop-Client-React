@@ -2,27 +2,27 @@ import { Bouquet, BouquetQuery } from "@/models/bouquet";
 import { getApiInstance } from "../api";
 import { Manager, PaginatedManager } from "../manager";
 import { PaginateResult } from "@/models/common";
-import { Occasion } from "@/models/occasion";
+import { SubOccasion } from "@/models/occasion";
 
 // TODO change param type
 const list = async () => {
-    return getApiInstance().get("/occasions");
+    return getApiInstance().get("/suboccasions");
 };
 
 const fromId = async(id: number | string) => {
-   return getApiInstance().get(`/occasions/${id}`);
+   return getApiInstance().get(`/suboccasions/${id}`);
 }
 
-const post = async(item: Occasion) => {
-   return getApiInstance().post(`/occasions/`, item);
+const post = async(item: SubOccasion) => {
+   return getApiInstance().post(`/suboccasions/`, item);
 }
 
-const put = async(item: Occasion) => {
-   return getApiInstance().put(`/occasions/${item.id}`, item);
+const put = async(item: SubOccasion) => {
+   return getApiInstance().put(`/suboccasions/${item.id}`, item);
 }
 
 const deleteOne = async(id: number | string) => {
-   return getApiInstance().delete(`/occasions/${id}`);
+   return getApiInstance().delete(`/suboccasions/${id}`);
 }
 
 
@@ -34,15 +34,15 @@ export default {
     delete: deleteOne
 };
 
-export class OccasionManager extends Manager<Occasion, null> {
-    async list(): Promise<Occasion[]> {
+export class SubOccasionManager extends Manager<SubOccasion, null> {
+    async list(): Promise<SubOccasion[]> {
         const x = await list();
         return x.data;
     }
-    async post(item: Occasion): Promise<void> {
+    async post(item: SubOccasion): Promise<void> {
         await post(item);
     }
-    async put(item: Occasion): Promise<void> {
+    async put(item: SubOccasion): Promise<void> {
         await put(item);
     }
     async delete(id: number | string): Promise<void> {

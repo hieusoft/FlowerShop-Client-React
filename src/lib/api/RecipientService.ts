@@ -1,6 +1,9 @@
 import { Recipient } from "@/models/recipient";
 import { getApiInstance } from "../api";
 
+function list() {
+    return getApiInstance().get(`/recipients`);
+}
 function fromUser(id: number) {
     return getApiInstance().get<Recipient[]>(`/user/${id}/recipients`);
 }
@@ -8,16 +11,17 @@ function fromSelf() {
     return getApiInstance().get<Recipient[]>(`/user/recipients`);
 }
 function post(data: Recipient) {
-    return getApiInstance().post(`/user/recipients`, data);
+    return getApiInstance().post(`/recipients`, data);
 }
 function put(data: Recipient) {
-    return getApiInstance().put(`/user/recipients`, data);
+    return getApiInstance().put(`/recipients`, data);
 }
 function deleteOne(id: number | string) {
-    return getApiInstance().delete(`/user/recipients/${id}`);
+    return getApiInstance().delete(`/recipients/${id}`);
 }
 
 export default {
+    list,
     fromUser,
     fromSelf,
     post,

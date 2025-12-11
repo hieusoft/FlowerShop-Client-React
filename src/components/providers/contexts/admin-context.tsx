@@ -1,14 +1,16 @@
 "use client";
 
-import { useObjectState } from "@/hooks/use-object-state";
-import { Occasion } from "@/models/occasion";
+import SubOccasionsPage from "@/components/pages/admin/SubOccasionsPage";
+import { defaultObjectState, useObjectState } from "@/hooks/use-object-state";
+import { Occasion, SubOccasion } from "@/models/occasion";
 import React, { Context, createContext } from "react";
 
 const defaultValue = {
-    cart: [],
+    subOccasions: null as SubOccasion[] | null,
+    occasions: null as Occasion[] | null
 }
 
-export const AdminContext = createContext(defaultValue);
+export const AdminContext = createContext(defaultObjectState(defaultValue));
 
 export function AdminContextProvider(
     { children }: { 

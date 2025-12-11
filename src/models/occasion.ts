@@ -6,7 +6,8 @@ export type Occasion = {
 }
 
 export type SubOccasion = {
-    _id: string,
+    id?: string,
+    _id?: string,
     name: string,
     description: string,
     occasionId: string,

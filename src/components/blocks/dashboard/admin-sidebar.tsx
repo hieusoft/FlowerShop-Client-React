@@ -83,11 +83,15 @@ export function AdminSidebar({}) {
                         name="Bouquets"
                       />
                       <CommonSidebarItem
+                        href="/admin/categories"
+                        name="Occasion Categories"
+                      />
+                      <CommonSidebarItem
                         href="/admin/occasions"
                         name="Occasions"
                       />
                       <CommonSidebarItem
-                        href="/admin/grettings"
+                        href="/admin/greetings"
                         name="Greetings"
                       />
                       <CommonSidebarItem href="/admin/coupons" name="Coupons" />

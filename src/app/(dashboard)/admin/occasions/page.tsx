@@ -1,5 +1,5 @@
-import OccasionsPage from '@/components/pages/admin/OccasionsPage';
+import SubOccasionsPage from '@/components/pages/admin/SubOccasionsPage';
 
 export default function Page() {
-    return <OccasionsPage />;
+    return <SubOccasionsPage />;
 }

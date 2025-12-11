@@ -1,6 +1,7 @@
 
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 
+export const API_ROOT =  process.env.NEXT_PUBLIC_API_ROOT;
 export const ACCESS_TOKEN_KEY = "auth-access-token";
 
 interface AxiosRequestConfigWithRetry extends InternalAxiosRequestConfig {
