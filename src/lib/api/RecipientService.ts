@@ -1,11 +1,11 @@
 import { Recipient } from "@/models/recipient";
 import { getApiInstance } from "../api";
 
-function fromUser(id: number) {
-    return getApiInstance().get<Recipient[]>(`/user/${id}/recipients`);
-}
-function fromSelf() {
+function fromUser() {
     return getApiInstance().get<Recipient[]>(`/user/recipients`);
+}
+function fromSelf(id: number) {
+    return getApiInstance().get<Recipient[]>(`/user/recipients/${id}`);
 }
 function post(data: Recipient) {
     return getApiInstance().post(`/user/recipients`, data);

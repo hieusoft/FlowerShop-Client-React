@@ -21,7 +21,7 @@ import {
   ArrowRight,
   Lock,
 } from "lucide-react";
-import CouponService from "@/lib/CouponService";
+import CouponService from "@/lib/api/CouponService";
 
 interface CartSummaryProps {
   subtotal: number;

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, ChevronDown, X } from "lucide-react";
-import AuthService from "@/lib/AuthService";
+import RecipientService from "@/lib/api/RecipientService";
 import { useState, useEffect } from "react";
 import { on } from "events";
 
@@ -37,7 +37,8 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
     const fetchRecipients = async () => {
       try {
         setIsLoading(true);
-        const data = await AuthService.GetReipientUser();
+        const data = await RecipientService.fromUser();
+        console.log("Fetched recipients:", data.data); 
         setRecipients(data.data);
 
         const defaultRecipient = data.data.find((recipient: Recipient) => recipient.isDefault);

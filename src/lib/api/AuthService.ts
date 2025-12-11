@@ -1,4 +1,4 @@
-// AuthService.ts
+
 import { User } from "@/models/user";
 import { getApiInstance } from "../api";
 
