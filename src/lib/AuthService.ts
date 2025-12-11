@@ -33,6 +33,9 @@ const ChangePassword = async (oldPassword: string, newPassword: string) => {
 const Profile = async () => {
     return apiInstance.get("/user/profile");
 };
+const GetReipientUser = async () => {
+    return apiInstance.get(`/user/recipients`);
+}
 
 export default {
     Login,
@@ -42,4 +45,5 @@ export default {
     ForgotPassword,
     ResetPassword,
     ChangePassword,
+    GetReipientUser
 };
