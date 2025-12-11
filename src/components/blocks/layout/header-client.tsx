@@ -15,24 +15,22 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "next-themes";
 import { MonitorIcon } from "lucide-react";
 import { HeaderUser } from "./header-user";
+import { CartItem } from "@/models/cart";
 
 export function HeaderClient(
-    { occasions } : {
-        occasions: React.ReactNode
-    }
+    { occasions } : { occasions: React.ReactNode }
 ) {
     const [isScrolled, setIsScrolled] = useState(false);
     const [navValue, setNavValue] = useState("");
+    const [cartQty, setCartQty] = useState(0);
 
     const isMobile = useIsMobile();
     const [isMobileExpanded, setIsMobileExpanded] = useState(false);
 
     const { theme, setTheme } = useTheme();
-
     const orientation = isMobile ? "vertical" : "horizontal";
 
     function handleNavValueChange(target: string) {
-        console.log("nav value = " + target)
         if (isMobile && isMobileExpanded) {
             setNavValue(target || navValue || "header-bouquets");
         } else {
@@ -40,29 +38,22 @@ export function HeaderClient(
         }
     }
 
-    function handleMobileExpandedChange(target: boolean) {
-        setIsMobileExpanded(target);
-    }
-
-    function handleDocumentScroll(event: Event) {
-        console.log("scroll event fired");
-        const scrollY = document.scrollingElement?.scrollTop ?? 0;
-        console.log("scroll event fired", scrollY);
-        setIsScrolled(scrollY > 0);
-    }
-
     function handleMobileExpandedToggle() {
         setIsMobileExpanded(!isMobileExpanded);
     }
 
+    function handleDocumentScroll() {
+        const scrollY = document.scrollingElement?.scrollTop ?? 0;
+        setIsScrolled(scrollY > 0);
+    }
+
+    // Scroll listener
     useEffect(() => {
         window.addEventListener("scroll", handleDocumentScroll);
+        return () => window.removeEventListener("scroll", handleDocumentScroll);
+    }, []);
 
-        return () => {
-            window.removeEventListener("scroll", handleDocumentScroll);
-        }
-    }, [])
-
+    // Reset mobile menu if screen changes
     useEffect(() => {
         if (!isMobile && isMobileExpanded) {
             setIsMobileExpanded(false);
@@ -73,7 +64,21 @@ export function HeaderClient(
 
     useEffect(() => {
         setNavValue(isMobileExpanded ? "header-bouquets" : "");
-    }, [isMobileExpanded])
+    }, [isMobileExpanded]);
+
+    // ----------------- Cart Realtime -----------------
+    useEffect(() => {
+        const updateCartQty = () => {
+            const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+            const totalQty = cart.reduce((sum: number, item: CartItem) => sum + item.quantity, 0);
+            setCartQty(totalQty);
+        };
+
+        updateCartQty();
+        window.addEventListener("cartUpdated", updateCartQty);
+
+        return () => window.removeEventListener("cartUpdated", updateCartQty);
+    }, []);
 
     return (
         <header className="@container/header sticky top-0 h-24 z-1000">
@@ -91,11 +96,7 @@ export function HeaderClient(
                                 <Signature />
                             </h1>
                         </Link>
-                        {/* Mobile nav */}
-                        <div className={cn(
-                            "flex gap-2 ml-auto",
-                            isMobile ? "" : "hidden"
-                        )}>
+                        <div className={cn("flex gap-2 ml-auto", isMobile ? "" : "hidden")}>
                             <Button variant="ghost" className="bg-background border rounded-full size-12 p-0" onClick={handleMobileExpandedToggle}>
                                 <MenuIcon className="size-5" />
                             </Button>
@@ -115,11 +116,7 @@ export function HeaderClient(
                                     ? "h-full flex-col items-center bg-background border-l p-4 gap-2"
                                     : ""
                             )}>
-                                {/* Mobile nav */}
-                                <div className={cn(
-                                    "flex gap-2 ml-auto",
-                                    isMobile ? "" : "hidden"
-                                )}>
+                                <div className={cn("flex gap-2 ml-auto", isMobile ? "" : "hidden")}>
                                     <Button variant="ghost" className="bg-background rounded-full size-12 p-0" onClick={handleMobileExpandedToggle}>
                                         <XIcon className="size-5" />
                                     </Button>
@@ -128,9 +125,7 @@ export function HeaderClient(
                                     <NavigationMenuTrigger className={isMobile ? "rounded-full size-10 p-0" : ""} hasIcon={!isMobile}>
                                         {isMobile ? <CalendarIcon className="size-5" /> : "Occasions"}
                                     </NavigationMenuTrigger>
-                                    <NavigationMenuContent>
-                                        {occasions}
-                                    </NavigationMenuContent>
+                                    <NavigationMenuContent>{occasions}</NavigationMenuContent>
                                 </NavigationMenuItem>
                                 <span className="grow"></span>
                                 <HeaderSearchTrigger>
@@ -141,25 +136,27 @@ export function HeaderClient(
                                 <NavigationMenuItem>
                                     <NavigationMenuTrigger className="rounded-full size-10 p-0" hasIcon={false}>
                                         <ShoppingBasketIcon className="size-5" />
-                                        <span>
+                                        {cartQty > 0 && (
                                             <Badge variant="secondary" className="absolute -bottom-1 -right-1 h-5 min-w-5 p-1 tabular-nums">
-                                                0
-                                                {/** TODO implement basket / cart */}
+                                                {cartQty}
                                             </Badge>
-                                        </span>
+                                        )}
                                     </NavigationMenuTrigger>
                                     <NavigationMenuContent>
                                         <div className="flex md:justify-end md:text-end gap-4 w-full">
                                             <div className="flex flex-col">
-                                                {/** TODO implement basket / cart */}
-                                                <Empty className="gap-2 max-h-none py-0 px-2 md:py-0 md:px-2 items-start *:text-start *:items-start md:items-end md:*:text-end md:*:items-end">
-                                                    <EmptyHeader className="font-heading text-2xl py-1">
-                                                        Your basket is empty
-                                                    </EmptyHeader>
-                                                    <EmptyContent>
-                                                        Things you add into your basket will be displayed here.
-                                                    </EmptyContent>
-                                                </Empty>
+                                                {cartQty === 0 ? (
+                                                    <Empty className="gap-2 max-h-none py-0 px-2 md:py-0 md:px-2 items-start *:text-start *:items-start md:items-end md:*:text-end md:*:items-end">
+                                                        <EmptyHeader className="font-heading text-2xl py-1">
+                                                            Your basket is empty
+                                                        </EmptyHeader>
+                                                        <EmptyContent>
+                                                            Things you add into your basket will be displayed here.
+                                                        </EmptyContent>
+                                                    </Empty>
+                                                ) : (
+                                                    <p className="px-2 py-2">You have {cartQty} item(s) in your cart.</p>
+                                                )}
                                             </div>
                                         </div>
                                     </NavigationMenuContent>
@@ -171,10 +168,7 @@ export function HeaderClient(
                                     <NavigationMenuContent className="flex lg:justify-end lg:text-end">
                                         <div className="flex flex-col lg:items-end lg:text-end">
                                             <h3 className="font-heading tracking-tight px-2 py-1 text-2xl">Colors</h3>
-                                            <ToggleGroup 
-                                                className="lg:justify-end px-2 mt-2"
-                                                type="single" variant="outline" value={theme} onValueChange={setTheme}
-                                            >
+                                            <ToggleGroup className="lg:justify-end px-2 mt-2" type="single" variant="outline" value={theme} onValueChange={setTheme}>
                                                 <ToggleGroupItem value="system">
                                                     <MonitorIcon />
                                                     Auto
@@ -196,8 +190,7 @@ export function HeaderClient(
                             <NavigationMenuViewport className={cn(
                                 "transition-[margin] *:transition-all",
                                 isMobile ? "" : (isScrolled ? "*:pb-8" : "border-t *:pt-4 -mt-2")
-                            )}>
-                            </NavigationMenuViewport>
+                            )} />
                         </NavigationMenu>
                     </div>
                     <HeaderSearchContent />
