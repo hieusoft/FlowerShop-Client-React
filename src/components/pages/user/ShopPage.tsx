@@ -1,7 +1,12 @@
 "use client";
 import { ProductCard } from "@/components/blocks/product/product-card";
 import { FieldGroup, FieldSet, FieldLegend, Field, FieldSeparator, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
+import { cn } from "@/lib/utils";
+import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import ProductService from "@/lib/ProductService";
 import {
     Pagination,
     PaginationContent,
@@ -10,48 +15,116 @@ import {
     PaginationLink,
     PaginationNext
 } from "@/components/ui/pagination";
-import { Slider } from "@/components/ui/slider";
-import ProductService from "@/lib/ProductService";
-import { cn } from "@/lib/utils";
-import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
 
 export default function ShopPage() {
-
     const { occasion, suboccasion } = useParams();
+    const router = useRouter();
 
-    const [products, setProducts] = useState<any[]>([]);
+    const [bouquets, setBouquets] = useState<any[]>([]);
+    const [occasionData, setOccasionData] = useState<any>(null);
+    const [isSuboccasionValid, setIsSuboccasionValid] = useState(true);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [priceRange, setPriceRange] = useState<[number, number]>([20, 1000]); // state cho slider
+    const [totalItems, setTotalItems] = useState(0);
+    const [priceRange, setPriceRange] = useState<[number, number]>([20, 1000]);
+    const [sortBy, setSortBy] = useState<string>("newest");
     const limit = 12;
 
-    const fetchProducts = async (pageNumber: number) => {
-        const res = await ProductService.GetAllProducts({
-            page: pageNumber,
-            limit: limit,
-            minPrice: priceRange[0], // filter theo giá
-            maxPrice: priceRange[1],
-            // subOccasionId: suboccasion,
-        });
+    const sortOptions = [
+        { value: "newest", label: "Newest Arrivals" },
+        { value: "oldest", label: "Oldest Arrivals" },
+        { value: "price_asc", label: "Price: Low to High" },
+        { value: "price_desc", label: "Price: High to Low" },
+        { value: "name_asc", label: "Name: A to Z" },
+        { value: "name_desc", label: "Name: Z to A" },
+    ];
 
-        setProducts(res.data.data);
-        setTotalPages(res.data.totalPages);
+    const mapSortOption = (sortBy: string): string => {
+        switch (sortBy) {
+            case "newest": return "newest";
+            case "oldest": return "oldest";
+            case "price_asc": return "priceAsc";
+            case "price_desc": return "priceDesc";
+            case "name_asc": return "nameAsc";
+            case "name_desc": return "nameDesc";
+            default: return "newest";
+        }
     };
 
     useEffect(() => {
-        fetchProducts(page);
-    }, [page, suboccasion, priceRange]);
+        const fetchData = async () => {
+            try {
+                const res = await ProductService.GetOccasionByName(occasion as string);
+                const data = res.data;
+                if (!data) {
+                    setBouquets([])
+                    return;
+                }
+                setOccasionData(data);
+
+                if (suboccasion && data.subOccasions) {
+                    const valid = data.subOccasions.some((sub: any) => sub.name === suboccasion);
+                    setIsSuboccasionValid(valid);
+                } else {
+                    setIsSuboccasionValid(true);
+                }
+            } catch (error) {
+                console.error(error);
+                setBouquets([])
+            }
+        };
+        fetchData();
+    }, [occasion, suboccasion, router]);
+
+
+    useEffect(() => {
+        if (occasionData && !isSuboccasionValid) {
+            setBouquets([])
+        }
+    }, [occasionData, isSuboccasionValid, router]);
+
+    const fetchBouquets = async (pageNumber: number) => {
+        if (!occasionData || !isSuboccasionValid) return;
+
+        try {
+            const res = await ProductService.GetAllProducts({
+                page: pageNumber,
+                limit,
+                minPrice: priceRange[0],
+                maxPrice: priceRange[1],
+                subOccasionName: suboccasion,
+                sortOption: mapSortOption(sortBy),
+            });
+            setBouquets(res.data.data);
+            setTotalPages(res.data.totalPages);
+            setTotalItems(res.data.totalItems);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
+        fetchBouquets(page);
+    }, [page, priceRange, sortBy, occasionData, isSuboccasionValid]);
+
 
     return (
         <div className="container mx-auto flex flex-col lg:flex-row mb-20 gap-4">
-
             <form className="lg:basis-1/3 xl:basis-1/4 shrink-0 px-8 lg:pr-4">
                 <FieldGroup>
                     <FieldSet>
                         <FieldLegend>Sort by</FieldLegend>
                         <Field>
-                            <Input placeholder="Search..." />
+                            <RadioGroup value={sortBy} onValueChange={setSortBy} className="space-y-2">
+                                {sortOptions.map(option => (
+                                    <div key={option.value} className="flex items-center space-x-2">
+                                        <RadioGroupItem value={option.value} id={option.value} />
+                                        <FieldLabel htmlFor={option.value} className="cursor-pointer font-normal">
+                                            {option.label}
+                                        </FieldLabel>
+                                    </div>
+                                ))}
+                            </RadioGroup>
                         </Field>
                     </FieldSet>
 
@@ -60,12 +133,9 @@ export default function ShopPage() {
                     <FieldSet>
                         <FieldLegend>Filters</FieldLegend>
                         <FieldGroup>
-
                             <Field>
                                 <FieldLabel>Price Range</FieldLabel>
-                                <p className="text-sm mb-2">
-                                    ${priceRange[0]} - ${priceRange[1]}
-                                </p>
+                                <p className="text-sm mb-2">${priceRange[0]} - ${priceRange[1]}</p>
                                 <Slider
                                     value={priceRange}
                                     max={1000}
@@ -75,20 +145,41 @@ export default function ShopPage() {
                                     onValueChange={(value: [number, number]) => setPriceRange(value)}
                                 />
                             </Field>
-
                         </FieldGroup>
                     </FieldSet>
                 </FieldGroup>
             </form>
 
             <section className="flex-1 px-8 lg:pl-4">
-                {products.length === 0 ? (
-                    <p>No products found.</p>
+                <div className="mb-6">
+                    <div className="space-y-2">
+                        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+                            {occasionData?.name || "Shop"}
+                        </h3>
+                        <p className="text-gray-600">{occasionData?.description || "Browse our collection"}</p>
+                        <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                            <span className="font-semibold text-gray-800">
+                                {sortOptions.find(opt => opt.value === sortBy)?.label}
+                            </span>
+                            <span>-</span>
+                            <span>{totalItems} {totalItems > 1 ? "Bouquets" : "Bouquet"}</span>
+                            <span>(page {page} of {totalPages})</span>
+                        </div>
+                    </div>
+                </div>
+
+                {bouquets.length === 0 ? (
+                    <p className="text-center py-10 text-gray-500">No bouquets found.</p>
                 ) : (
-                    <div className="w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-10">
-                        {products.map((product, index) => (
-                            <ProductCard key={index} product={product} />
+                    <div className="w-full grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
+                        {bouquets.map((bouquet, index) => (
+                            <ProductCard
+                                key={index}
+                                product={bouquet}
+                                occasion={occasion as string}
+                            />
                         ))}
+
                     </div>
                 )}
 
@@ -121,7 +212,6 @@ export default function ShopPage() {
                                 className={page === totalPages ? "pointer-events-none opacity-50" : ""}
                             />
                         </PaginationItem>
-
                     </PaginationContent>
                 </Pagination>
             </section>

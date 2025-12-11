@@ -8,11 +8,17 @@ const GetOccasionName = async () => {
     return apiInstance.get("/occasions");
 }
 
-const GetOccasionByName = async (name: string) => {
-    return apiInstance.get(`/occasions/${name}`);
+const GetOccasionByName = async (id: string) => {
+    return apiInstance.get(`/occasions/${id}`);
 }
+
+const GetProductById = async(id : string) => {
+   return apiInstance.get(`/bouquets/${id}`);
+}
+
 
 export default {
     GetAllProducts,
-    GetOccasionName
+    GetOccasionByName,
+    GetProductById
 };
