@@ -153,7 +153,7 @@ export function UserRecipientForm(
         ward: "",
         city: "",
         phoneNumber: "",
-        isDefault: false
+        isDefault: true
     }) as ObjectState<Recipient>;
     const [isInit, setIsInit] = useState(false);
     const [isBusy, setIsBusy] = useState(!user);
@@ -190,6 +190,7 @@ export function UserRecipientForm(
                     break;
                 }
                 console.log(defaultRecipient?.recipientId);
+                formState.set.isDefault(true);
                 setIsNew(!defaultRecipient?.recipientId);
                 setIsBusy(false);
             })
