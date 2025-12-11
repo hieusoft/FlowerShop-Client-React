@@ -149,6 +149,8 @@ export function UserRecipientForm(
         userId: user?.userId,
         fullName: "",
         addressLine: "",
+        province: "",
+        ward: "",
         city: "",
         phoneNumber: "",
         isDefault: false
@@ -197,18 +199,32 @@ export function UserRecipientForm(
     return (
         <form onSubmit={handleSubmit}>
             <FieldGroup>
-                <FieldSet>
-                    <Field>
-                        <FieldLabel className="m-0">Recipient&apos;s full name</FieldLabel>
-                        <Input
-                            name="fullName"
-                            required
-                            value={formState.fullName}
-                            onChange={handleInputChange}
-                            disabled={isDisabled}
-                        />
-                    </Field>
-                </FieldSet>
+                <div className="grid md:grid-cols-2 gap-5">
+                    <FieldSet>
+                        <Field>
+                            <FieldLabel className="m-0">Recipient&apos;s full name</FieldLabel>
+                            <Input
+                                name="fullName"
+                                required
+                                value={formState.fullName}
+                                onChange={handleInputChange}
+                                disabled={isDisabled}
+                            />
+                        </Field>
+                    </FieldSet>
+                    <FieldSet>
+                        <Field>
+                            <FieldLabel className="m-0">Phone number</FieldLabel>
+                            <Input
+                                name="phoneNumber"
+                                required
+                                value={formState.phoneNumber}
+                                onChange={handleInputChange}
+                                disabled={isDisabled}
+                            />
+                        </Field>
+                    </FieldSet>
+                </div>
                 <FieldSet>
                     <Field>
                         <FieldLabel className="m-0">Address line</FieldLabel>
@@ -224,11 +240,11 @@ export function UserRecipientForm(
                 <div className="grid md:grid-cols-2 gap-5">
                     <FieldSet>
                         <Field>
-                            <FieldLabel className="m-0">City</FieldLabel>
+                            <FieldLabel className="m-0">Province</FieldLabel>
                             <Input
-                                name="city"
+                                name="province"
                                 required
-                                value={formState.city}
+                                value={formState.province}
                                 onChange={handleInputChange}
                                 disabled={isDisabled}
                             />
@@ -236,11 +252,11 @@ export function UserRecipientForm(
                     </FieldSet>
                     <FieldSet>
                         <Field>
-                            <FieldLabel className="m-0">Phone number</FieldLabel>
+                            <FieldLabel className="m-0">Ward</FieldLabel>
                             <Input
-                                name="phoneNumber"
+                                name="ward"
                                 required
-                                value={formState.phoneNumber}
+                                value={formState.ward}
                                 onChange={handleInputChange}
                                 disabled={isDisabled}
                             />

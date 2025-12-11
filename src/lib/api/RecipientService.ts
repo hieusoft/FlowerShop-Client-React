@@ -4,7 +4,7 @@ import { clientApiInstance, getApiInstance } from "../api";
 function fromUser(id: number) {
     return getApiInstance().get<Recipient[]>(`/user/${id}/recipients`);
 }
-function fromSelf(id: number) {
+function fromSelf() {
     return getApiInstance().get<Recipient[]>(`/user/recipients`);
 }
 function post(data: Recipient) {

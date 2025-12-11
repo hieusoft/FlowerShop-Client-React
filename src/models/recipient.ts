@@ -4,7 +4,8 @@ export type Recipient = {
     userId: number,
     fullName: string,
     addressLine: string,
-    city: string,
+    province: string,
+    ward: string,
     phoneNumber: string,
     isDefault: boolean
 }
