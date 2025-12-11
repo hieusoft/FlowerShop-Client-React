@@ -152,3 +152,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@utility auto-fill-* {
+  grid-template-columns: repeat(auto-fill, minmax(min(--value([*]), 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(--value(--text-*), 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(calc(var(--spacing) * --value(integer)), 100%), 1fr));
+}

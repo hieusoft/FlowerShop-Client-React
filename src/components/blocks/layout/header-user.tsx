@@ -14,13 +14,16 @@ export function HeaderUser (
 ) {
     const { user, userBusy } = useUser();
 
+    const loggedIn = !!user?.userName;
+
     return (
         <NavigationMenuItem className={className}>
             <NavigationMenuTrigger className="border block rounded-full size-12 p-0" hasIcon={false}>
                 {userBusy ? <Spinner className="size-5" /> : <UserAvatar className="size-full" user={user} />}
             </NavigationMenuTrigger>
             <NavigationMenuContent>
-                <div className="flex md:justify-end md:text-end gap-4 w-full">
+                <h2 className="font-heading px-2 pt-1 pb-4 text-3xl md:sr-only">Membership</h2>
+                <div className="flex flex-col md:flex-row md:justify-end md:text-end gap-4 w-full">
                     {userBusy ? <>
                     </> : !!user ? <>
                         <div className="px-2 text-sm">
@@ -51,7 +54,7 @@ export function HeaderUser (
                             <p className="max-w-80">
                                 Sign up for an account and get extra features and exclusive discounts!
                             </p>
-                            <p className="flex md:flex-row-reverse mt-4 gap-2">
+                            <p className="flex flex-col max-sm:items-stretch md:flex-row-reverse mt-4 gap-2">
                                 <Button variant="secondary" asChild>
                                     <Link href="/login">
                                         Log in
