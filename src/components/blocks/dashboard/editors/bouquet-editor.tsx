@@ -13,8 +13,13 @@ import { AxiosError } from "axios"
 
 export const BouquetEditor: Editor<Bouquet> = ({ manager, item, onClose }) => {
 
-    if (item && typeof item?.subOccasionId == "object") {
-        item.subOccasionId = (item.subOccasionId as unknown as SubOccasion)._id!;
+    if (item) {
+        if (typeof item?.subOccasionId == "object") {
+            item.subOccasionId = (item.subOccasionId as unknown as SubOccasion)._id!;
+        }
+        for (let a = 0; a < item.images.length; a++) {
+            if (typeof item.images[a] == "string") item.images[a] = { url: item.images[a] as string };
+        }
     }
 
     const [isBusy, setIsBusy] = useState(false);
@@ -27,7 +32,7 @@ export const BouquetEditor: Editor<Bouquet> = ({ manager, item, onClose }) => {
         description: "",
         price: 0,
         subOccasionId: "",
-        images: [] as string[],
+        images: [],
         createdAt: "",
         updatedAt: "",
     })

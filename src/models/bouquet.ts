@@ -6,8 +6,13 @@ export type Bouquet = {
     description: string,
     price: number,
     subOccasionId: string,
-    images: string[],
+    images: string[] | BouquetImageUpload[],
 } & HasTimestamp
+
+export type BouquetImageUpload = 
+    { keep: true }
+    | { base64: string }
+    | { url: string }
 
 export type BouquetQuery = {
     search_query?: string,
