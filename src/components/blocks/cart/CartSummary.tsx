@@ -116,7 +116,7 @@ export default function CartSummary({
     }
 
     try {
-      const res = await CouponService.ValidateCoupon(couponCode, subtotal);
+      const res = await CouponService.validateCoupon(couponCode, subtotal);
       
       if (res.data?.coupon?.valid) {
         const couponData = res.data.coupon;

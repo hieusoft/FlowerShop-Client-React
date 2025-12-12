@@ -3,10 +3,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { User, ChevronDown, X } from "lucide-react";
 import RecipientService from "@/lib/api/RecipientService";
 import { useState, useEffect } from "react";
-import { on } from "events";
 
 interface Recipient {
   recipientId: number;
@@ -20,10 +20,7 @@ interface Recipient {
 }
 
 interface ContactInfoStepProps {
-  formData: {
-    phone: string;
-    fullName: string;
-  };
+  formData: { phone: string; fullName: string };
   onInputChange: (field: string, value: string) => void;
 }
 
@@ -31,24 +28,26 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [selectedRecipientId, setSelectedRecipientId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showDropdown, setShowDropdown] = useState(false);
   const [useManualInput, setUseManualInput] = useState(false);
 
+  // Fetch recipients
   useEffect(() => {
     const fetchRecipients = async () => {
       try {
         setIsLoading(true);
-        const data = await RecipientService.fromUser();
-        
-        setRecipients(data.data);
+        const response = await RecipientService.fromUser();
+        const data = response.data || [];
 
-        const defaultRecipient = data.data.find((recipient: Recipient) => recipient.isDefault);
-        if (defaultRecipient) {
-          setSelectedRecipientId(defaultRecipient.recipientId);
-          updateFormData(defaultRecipient);
-        } else if (data.data.length > 0) {
-          setSelectedRecipientId(data.data[0].recipientId);
-          updateFormData(data.data[0]);
+        setRecipients(data);
+
+        const defaultRecipient = data.find((r: Recipient) => r.isDefault);
+        const firstRecipient = data[0];
+
+        const selected = defaultRecipient || firstRecipient;
+
+        if (selected) {
+          setSelectedRecipientId(selected.recipientId);
+          fillFormWithRecipient(selected);
         }
       } catch (error) {
         console.error("Failed to fetch recipients:", error);
@@ -60,45 +59,37 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
     fetchRecipients();
   }, []);
 
-  const handleRecipientSelect = (recipient: Recipient) => {
-    setSelectedRecipientId(recipient.recipientId);
-    setUseManualInput(false);
-    updateFormData(recipient);
-    setShowDropdown(false);
+  // Helper to fill form
+  const fillFormWithRecipient = (recipient: Recipient) => {
+    onInputChange("fullName", recipient.fullName);
+    onInputChange("phone", recipient.phoneNumber);
+    onInputChange("address", recipient.addressLine);
+    onInputChange("province", recipient.province);
+    onInputChange("ward", recipient.ward);
     onInputChange("isNew", "false");
-
   };
 
-  const handleUseManualInput = () => {
+  const clearToManualInput = () => {
     setUseManualInput(true);
     setSelectedRecipientId(null);
-
     onInputChange("fullName", "");
     onInputChange("phone", "");
     onInputChange("isNew", "true");
-    setShowDropdown(false);
   };
 
-  const handleClearSelection = () => {
-    handleUseManualInput();
+  const handleRecipientSelect = (recipient: Recipient) => {
+    setUseManualInput(false);
+    setSelectedRecipientId(recipient.recipientId);
+    fillFormWithRecipient(recipient);
   };
 
-  const updateFormData = (recipient: Recipient) => {
-    onInputChange("fullName", recipient.fullName);
-    onInputChange("phone", recipient.phoneNumber);
-    onInputChange("isNew", "false");
-    onInputChange("address", recipient.addressLine);
-    onInputChange("province", recipient.province);
-    onInputChange("ward", recipient.ward); 
-    };
+  const selectedRecipient = recipients.find((r) => r.recipientId === selectedRecipientId);
 
-  const selectedRecipient = recipients.find(r => r.recipientId === selectedRecipientId);
-
-  const getDropdownDisplayText = () => {
-    if (useManualInput) return "Enter manually";
-    if (selectedRecipient) return selectedRecipient.fullName;
-    return "Select recipient";
-  };
+  const triggerText = useManualInput
+    ? "Enter manually"
+    : selectedRecipient
+      ? selectedRecipient.fullName
+      : "Select recipient";
 
   return (
     <Card>
@@ -112,16 +103,18 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-6">
-      
+      <CardContent className="space-y-6 overflow-visible">
+
+        {/* Recipient Dropdown */}
         {!isLoading && recipients.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>Select Recipient</Label>
+
               {selectedRecipientId && !useManualInput && (
                 <button
                   type="button"
-                  onClick={handleClearSelection}
+                  onClick={clearToManualInput}
                   className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
                 >
                   <X className="h-3 w-3" />
@@ -130,39 +123,44 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
               )}
             </div>
 
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center justify-between w-full p-3 border rounded-md bg-white hover:bg-gray-50 transition-colors"
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center justify-between w-full p-3 border rounded-md bg-white hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="font-medium">{triggerText}</span>
+
+                    {!useManualInput && selectedRecipient?.isDefault && (
+                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        Default
+                      </span>
+                    )}
+
+                    {useManualInput && (
+                      <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                        Manual Input
+                      </span>
+                    )}
+                  </div>
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </PopoverTrigger>
+
+              {/* FULL WIDTH FIX */}
+              <PopoverContent
+                align="start"
+                sideOffset={4}
+                className="w-[var(--radix-popper-anchor-width)] p-0"
               >
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span className="font-medium">{getDropdownDisplayText()}</span>
+                <div className="max-h-60 overflow-auto">
 
-                  {selectedRecipient?.isDefault && !useManualInput && (
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                      Default
-                    </span>
-                  )}
-
-                  {useManualInput && (
-                    <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                      Manual Input
-                    </span>
-                  )}
-                </div>
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform ${showDropdown ? "rotate-180" : ""}`}
-                />
-              </button>
-
-              {showDropdown && (
-                <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
-                  {/* Manual Input Option */}
+                  {/* Manual Mode Option */}
                   <button
                     type="button"
-                    onClick={handleUseManualInput}
+                    onClick={clearToManualInput}
                     className={`flex items-center justify-between w-full p-3 text-left hover:bg-gray-50 ${
                       useManualInput ? "bg-blue-50" : ""
                     }`}
@@ -171,6 +169,7 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
                       <div className="font-medium">Enter Manually</div>
                       <div className="text-sm text-gray-500">Create a new recipient</div>
                     </div>
+
                     {useManualInput && (
                       <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
                         Selected
@@ -206,12 +205,12 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
                     </button>
                   ))}
                 </div>
-              )}
-            </div>
+              </PopoverContent>
+            </Popover>
           </div>
         )}
 
-        {/* Contact Form (No email) */}
+        {/* Contact Form */}
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number *</Label>
@@ -222,7 +221,7 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
               value={formData.phone}
               onChange={(e) => onInputChange("phone", e.target.value)}
               required
-              disabled={selectedRecipient && !useManualInput}
+              disabled={selectedRecipientId && !useManualInput}
             />
           </div>
 
@@ -234,7 +233,7 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
               value={formData.fullName}
               onChange={(e) => onInputChange("fullName", e.target.value)}
               required
-              disabled={selectedRecipient && !useManualInput}
+              disabled={selectedRecipientId && !useManualInput}
             />
           </div>
         </div>
@@ -244,19 +243,19 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
           <div className="text-center py-4 text-gray-500">Loading recipients...</div>
         )}
 
-        {/* No recipients */}
+        {/* Empty List */}
         {!isLoading && recipients.length === 0 && (
           <div className="text-center py-4 text-gray-500 border rounded-md bg-gray-50">
             You have no saved recipients. Please enter manually.
           </div>
         )}
 
-        {/* Manual input info */}
+        {/* Manual Mode Info */}
         {useManualInput && (
           <div className="p-3 border border-blue-200 bg-blue-50 rounded-md">
             <p className="text-sm text-blue-800">
-              <strong>Manual Input Mode:</strong> You are entering a new recipient.  
-              This information will NOT be saved to your recipient list.
+              <strong>Manual Input Mode:</strong> You are entering a new recipient.
+              This information will NOT be saved to your list.
             </p>
           </div>
         )}

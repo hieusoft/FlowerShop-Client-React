@@ -10,33 +10,9 @@ import RecommendedProducts from "@/components/blocks/cart/RecommendedProducts";
 import { CartItemFlower, RecommendedProduct } from "../../../models/cart";
 
 export default function CartPage() {
-  const cartItems: CartItemFlower[] = [
-    {
-      id: "693696469b75237114deb8d4",
-      name: "Pink Romance",
-      description: "A romantic bouquet dominated by pink hues...",
-      price: 128,
-      quantity: 2,
-      image: "/uploads/bouquets/1765369634830-dedi74do4ht.png",
-      subOccasion: {
-        id: "6935c4bec6b6b0fc2c4e6200",
-        name: "Romance",
-        description: "Celebrate the magic of love with romantic gestures..."
-      }
-    },
-    {
-      id: "693696469b75237114deb8d5",
-      name: "Sunshine Delight",
-      description: "Bright yellow roses to bring happiness and joy",
-      price: 98,
-      quantity: 1,
-      image: "/uploads/bouquets/1765369634830-dedi74do4ht.png",
-      subOccasion: {
-        id: "6935c4bec6b6b0fc2c4e6201",
-        name: "Friendship",
-        description: "Perfect for friends and cheerful moments"
-      }
-    }
+  const cartItems: CartItemFlower[] = localStorage.getItem("cart")
+    ? JSON.parse(localStorage.getItem("cart") as string)
+    : [
   ];
 
   const [items, setItems] = useState<CartItemFlower[]>(cartItems);
