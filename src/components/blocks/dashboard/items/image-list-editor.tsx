@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input"
 import { API_ROOT } from "@/lib/api";
 import { BouquetImageUpload } from "@/models/bouquet";
-import { FileX, PlusIcon, UploadIcon } from "lucide-react";
+import { DeleteIcon, FileX, PlusIcon, UploadIcon, XIcon } from "lucide-react";
 import { ChangeEvent, DragEvent, useRef } from "react";
 
 export function ImageListEditor(
@@ -16,6 +16,9 @@ export function ImageListEditor(
 
     function handleItemAdd(values: BouquetImageUpload[]) {
         onItemsChange([...items, ...values]);
+    }
+    function handleItemDelete(index: number) {
+        onItemsChange(items.filter((x, i) => i != index));
     }
 
     function getImagePath(value: BouquetImageUpload): string {
@@ -61,7 +64,15 @@ export function ImageListEditor(
     return <div className="grid auto-fill-20 gap-2">
         {items.map((item, index) => (
             <div key={index} className="relative aspect-square border overflow-hidden rounded-md">
-                <img className="absolute inset-0 object-cover object-center" src={getImagePath(item)} alt="" />
+                <img className="absolute inset-0 w-full h-full object-cover object-center" src={getImagePath(item)} alt="" />
+                <div className="absolute right-0 bottom-0 bg-background rounded-tl-sm">
+                    <Button 
+                        variant="destructive" size="icon-sm" className="rounded-none rounded-tl-sm"
+                        onClick={() => handleItemDelete(index)}
+                    >
+                        <XIcon />
+                    </Button>
+                </div>
             </div>
         ))}
         <div className="relative aspect-square">
