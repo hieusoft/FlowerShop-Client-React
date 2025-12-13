@@ -11,13 +11,13 @@ function fromSelf() {
     return getApiInstance().get<Recipient[]>(`/user/recipients`);
 }
 function post(data: Recipient) {
-    return getApiInstance().post(`/recipients`, data);
+    return getApiInstance().post(`/user/recipients`, data);
 }
 function put(data: Recipient) {
-    return getApiInstance().put(`/recipients`, data);
+    return getApiInstance().put(`/user/recipients`, data);
 }
 function deleteOne(id: number | string) {
-    return getApiInstance().delete(`/recipients/${id}`);
+    return getApiInstance().delete(`/user/recipients/${id}`);
 }
 
 export default {

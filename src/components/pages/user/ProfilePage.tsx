@@ -1,9 +1,10 @@
 "use client"
+import { UserDeliverySettings } from "@/components/blocks/user/user-delivery-settings";
 import { UserInfoSettings } from "@/components/blocks/user/user-info-settings";
 import { useUser } from "@/components/providers/contexts/global-context"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TabsContent } from "@radix-ui/react-tabs";
-import { NavigationIcon, ShoppingBasketIcon, TriangleAlertIcon, UserIcon } from "lucide-react";
+import { NavigationIcon, ShoppingBasketIcon, TriangleAlertIcon, TruckIcon, UserIcon } from "lucide-react";
 
 export default function ProfilePage() {
 
@@ -17,6 +18,10 @@ export default function ProfilePage() {
           <UserIcon className="size-5" />
           Information
         </TabsTrigger>
+        <TabsTrigger value="delivery">
+          <TruckIcon className="size-5" />
+          Delivery
+        </TabsTrigger>
         <TabsTrigger value="orders">
           <ShoppingBasketIcon className="size-5" />
           Order tracking
@@ -24,6 +29,9 @@ export default function ProfilePage() {
       </TabsList>
       <TabsContent className="flex-1" value="information">
         <UserInfoSettings />
+      </TabsContent>
+      <TabsContent className="flex-1" value="delivery">
+        <UserDeliverySettings />
       </TabsContent>
     </Tabs>
   </div>
