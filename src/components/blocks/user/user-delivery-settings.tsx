@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@radix-ui/react-separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { ProvincePicker, WardPicker } from "../editors/province-ward-picker";
 
 export function UserDeliverySettings() {
     const { user } = useUser();
@@ -118,6 +119,7 @@ export function UserRecipientForm(
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const isNew = !recipient;
     const isDisabled = disabled || isBusy || !user;
+    const [provinceCode, setProvinceCode] = useState(-1);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -214,25 +216,15 @@ export function UserRecipientForm(
                     <FieldSet>
                         <Field>
                             <FieldLabel className="m-0">Province</FieldLabel>
-                            <Input
-                                name="province"
-                                required
-                                value={formState.province}
-                                onChange={handleInputChange}
-                                disabled={isDisabled}
-                            />
+                            <ProvincePicker value={formState.province} onValueChange={formState.set.province}
+                                onCodeChange={setProvinceCode} disabled={isDisabled} />
                         </Field>
                     </FieldSet>
                     <FieldSet>
                         <Field>
                             <FieldLabel className="m-0">Ward</FieldLabel>
-                            <Input
-                                name="ward"
-                                required
-                                value={formState.ward}
-                                onChange={handleInputChange}
-                                disabled={isDisabled}
-                            />
+                            <WardPicker value={formState.ward} onValueChange={formState.set.ward}
+                                provinceCode={provinceCode} disabled={isDisabled} />
                         </Field>
                     </FieldSet>
                 </div>
@@ -242,7 +234,7 @@ export function UserRecipientForm(
                             <Checkbox 
                                 id="recipient-default-checkbox"
                                 checked={formState.isDefault} onCheckedChange={formState.set.isDefault}
-                                disabled={recipient?.isDefault}
+                                disabled={recipient?.isDefault || isDisabled}
                             ></Checkbox>
                             <FieldLabel htmlFor="recipient-default-checkbox">Use as default for future orders</FieldLabel>
                         </Field>
