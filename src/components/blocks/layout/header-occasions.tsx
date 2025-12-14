@@ -19,7 +19,7 @@ export async function HeaderOccasions (
                     <h3 className="font-heading px-2 py-1 text-2xl">{occasion.name}</h3>
                     {occasion.subOccasions.map(subOccasion => (
                         <NavigationMenuLink asChild key={subOccasion._id}>
-                            <Link href="/">
+                            <Link href={`/shop/${occasion.name}/${subOccasion.name}`}>
                                 {subOccasion.name}
                             </Link>
                         </NavigationMenuLink>
