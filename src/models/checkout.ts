@@ -1,5 +1,6 @@
+import { CartItemFlower } from "./cart";
+
 export interface CheckoutFormData {
-  email: string;
   phone: string;
   fullName: string;
   address: string;
@@ -12,7 +13,11 @@ export interface CheckoutFormData {
   isNew: boolean;
   giftMessage: string;
   deliveryDate: string;
-  deliveryTime: string
+  deliveryTime: string;
+  tax: number;
+  fee: number;
+  cartItems: CartItemFlower[];
+  couponCode: string | null;
 }
 
 export interface CheckoutState {

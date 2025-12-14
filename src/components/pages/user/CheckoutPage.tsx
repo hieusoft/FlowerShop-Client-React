@@ -4,9 +4,12 @@ import { useState } from "react";
 import ProgressSteps from "@/components/blocks/checkout/ProgressSteps";
 import CheckoutForm from "@/components/blocks/checkout/CheckoutForm";
 import OrderSummary from "@/components/blocks/checkout/OrderSummary";
-
 import { CheckoutFormData } from "../../../models/checkout";
 import SuccessMessage from "@/components/blocks/checkout/SuccessMessage";
+import RecipientService from "@/lib/api/RecipientService";
+import OrderService from "@/lib/api/OrderService";
+import PaymentService from "@/lib/api/PaymentService";
+import PaymentProcessing from "@/components/blocks/checkout/PaymentProcessing";
 
 import {
   AlertDialog,
@@ -18,26 +21,28 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+interface RecipientCreateDTO {
+  fullName: string;
+  addressLine: string;
+  province: string;
+  ward: string;
+  phoneNumber: string;
+}
+
+type PaymentStatus = "idle" | "processing" | "success" | "failed";
+
 export default function CheckoutPage() {
   const [step, setStep] = useState(1);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [orderComplete, setOrderComplete] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("idle");
   const [orderNumber, setOrderNumber] = useState("");
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponError, setCouponError] = useState("");
-
-  // Alert dialog state
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-
-  const showAlert = (message: string) => {
-    setAlertMessage(message);
-    setAlertOpen(true);
-  };
-
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
   const [formData, setFormData] = useState<CheckoutFormData>({
-    email: "",
     phone: "",
     fullName: "",
     address: "",
@@ -51,7 +56,16 @@ export default function CheckoutPage() {
     giftMessage: "",
     deliveryDate: "",
     deliveryTime: "",
+    tax: 0,
+    fee: 0,
+    cartItems: [],
+    couponCode: null,
   });
+
+  const showAlert = (message: string) => {
+    setAlertMessage(message);
+    setAlertOpen(true);
+  };
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({
@@ -76,10 +90,7 @@ export default function CheckoutPage() {
   };
 
   const handleNextStep = () => {
-    if (
-      step === 1 &&
-      (!formData.phone || !formData.fullName || !formData.isNew)
-    ) {
+    if (step === 1 && (!formData.phone || !formData.fullName)) {
       showAlert("Please complete your contact information.");
       return;
     }
@@ -107,28 +118,120 @@ export default function CheckoutPage() {
   const handlePrevStep = () => {
     setStep(step - 1);
   };
+  const removeOrderedItemsFromCart = (orderedItems: any[]) => {
+    const rawCart = localStorage.getItem("cart");
+    if (!rawCart) return;
+
+    const cart = JSON.parse(rawCart);
+
+    const orderedIds = orderedItems.map(item => item.id);
+
+    const newCart = cart.filter(
+      (item: any) => !orderedIds.includes(item.id)
+    );
+
+    if (newCart.length > 0) {
+      localStorage.setItem("cart", JSON.stringify(newCart));
+    } else {
+      localStorage.removeItem("cart");
+    }
+  };
 
   const handlePlaceOrder = async () => {
-    
     if (!formData.acceptTerms) {
       showAlert("Please accept the terms and conditions.");
       return;
     }
 
-    setIsProcessing(true);
+    
+    setPaymentStatus("processing");
 
-    setTimeout(() => {
-      const newOrderNumber = `ORD-${Math.floor(
-        100000 + Math.random() * 900000
-      )}`;
+    try {
+      
+      const raw = localStorage.getItem("checkoutData");
+      const checkoutData = raw ? JSON.parse(raw) : null;
 
-      setOrderNumber(newOrderNumber);
-      setIsProcessing(false);
-      setOrderComplete(true);
-    }, 2000);
+      if (!checkoutData) {
+        throw new Error("Checkout data not found.");
+      }
+
+
+      const finalData: CheckoutFormData = {
+        paymentMethod: formData.paymentMethod,
+        deliveryDate: formData.deliveryDate,
+        deliveryTime: formData.deliveryTime,
+        fee: checkoutData.shippingFee ?? 0,
+        tax: checkoutData.tax ?? 0,
+        cartItems: checkoutData.cartItems ?? [],
+        currency: formData.paymentMethod === "oxapay" ? "USD" : "VND",
+        couponCode: checkoutData.couponCode ?? null,
+        fullName: formData.fullName,
+        address: formData.address,
+        province: formData.province,
+        ward: formData.ward,
+        phone: formData.phone,
+        isNew: formData.isNew ?? false,
+        note: formData.note,
+        giftMessage: formData.giftMessage,
+        saveInfo: formData.saveInfo,
+        acceptTerms: formData.acceptTerms,
+      };
+
+     
+      if (finalData.isNew) {
+        const recipient_new: RecipientCreateDTO = {
+          fullName: finalData.fullName,
+          addressLine: finalData.address,
+          province: finalData.province,
+          ward: finalData.ward,
+          phoneNumber: finalData.phone,
+        };
+        await RecipientService.post(recipient_new);
+      }
+
+      
+      const order = await OrderService.createOrder(finalData);
+
+      if (!order || !order.data.order_id) {
+        throw new Error("Order creation failed or order ID not returned.");
+      }
+      removeOrderedItemsFromCart(checkoutData.cartItems);
+      localStorage.removeItem("checkoutData");
+      window.dispatchEvent(new Event("cartUpdated"));
+      await delay(3000);
+      const paymentResponse = await PaymentService.getPaymentByOrderId(order.data.order_id);
+      console.log(paymentResponse);
+      
+      const paymentUrl = paymentResponse?.data?.paymentUrl;
+
+      if (paymentUrl) {
+
+        window.open(paymentUrl, "_blank");
+        
+
+        
+        
+      } else if (formData.paymentMethod === "cod") {
+
+        setOrderNumber(order.data.order_code);
+        setPaymentStatus("success");
+      } else {
+        throw new Error("Payment method not supported or payment URL not available.");
+      }
+
+    } catch (error) {
+      console.error("Order error:", error);
+      setPaymentStatus("failed");
+      showAlert("Failed to place order. Please try again.");
+    }
   };
 
-  if (orderComplete) {
+
+  if (paymentStatus === "processing") {
+    return <PaymentProcessing />;
+  }
+
+  if (paymentStatus === "success") {
     return <SuccessMessage orderNumber={orderNumber} formData={formData} />;
   }
 
@@ -141,7 +244,7 @@ export default function CheckoutPage() {
           <CheckoutForm
             step={step}
             formData={formData}
-            isProcessing={isProcessing}
+            isProcessing={paymentStatus === "processing"}
             onInputChange={handleInputChange}
             onNextStep={handleNextStep}
             onPrevStep={handlePrevStep}
@@ -161,7 +264,6 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      {/* Alert Dialog */}
       <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

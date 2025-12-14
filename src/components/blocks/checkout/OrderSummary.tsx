@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, Shield, Lock, AlertCircle, Package } from "lucide-react";
 
 interface CartItemFlower {
-  id: string; 
+  id: string;
   name: string;
   description?: string;
   price: number;
@@ -21,13 +21,8 @@ interface CartItemFlower {
   };
 }
 
-interface CheckoutData {
-  items?: Array<{
-    bouquet_id?: number;
-    id?: string;
-    price: number;
-    quantity: number;
-  }>;
+interface CheckoutDataRaw {
+  cartItems: CartItemFlower[];
   subtotal: number;
   shippingFee: number;
   discount: number;
@@ -44,93 +39,46 @@ interface CheckoutData {
   timestamp: string;
 }
 
-interface CheckoutSummary {
-  subtotal: string;
-  shippingFee: string;
-  discount: string;
-  tax: string;
-  total: string;
-  couponCode: string;
-  discountText: string;
-  itemCount: number;
+interface CheckoutData extends CheckoutDataRaw {
+  items: CartItemFlower[];
 }
 
 export default function OrderSummary() {
   const [checkoutData, setCheckoutData] = useState<CheckoutData | null>(null);
-  const [checkoutSummary, setCheckoutSummary] = useState<CheckoutSummary | null>(null);
-  const [cartItems, setCartItems] = useState<CartItemFlower[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-
   useEffect(() => {
     try {
-      console.log("Loading checkout data from localStorage...");
-      
-      const checkoutDataStr = localStorage.getItem("checkoutData");
-      const summaryStr = localStorage.getItem("checkoutSummary");
-      const cartItemsStr = localStorage.getItem("checkoutCartItems");
-
-      console.log("checkoutData:", checkoutDataStr);
-      console.log("cartItems:", cartItemsStr);
-
-     
-      if (cartItemsStr) {
-        try {
-          const items = JSON.parse(cartItemsStr) as CartItemFlower[];
-          if (Array.isArray(items)) {
-            console.log("Parsed cart items:", items);
-            setCartItems(items);
-          } else {
-            console.error("cartItems is not an array:", items);
-          }
-        } catch (err) {
-          console.error("Error parsing cart items:", err);
-        }
-      }
-
-      if (!checkoutDataStr && !cartItemsStr) {
+      const str = localStorage.getItem("checkoutData");
+      if (!str) {
         setError("Order information not found. Please return to the cart.");
         setLoading(false);
         return;
       }
 
-   
-      if (checkoutDataStr) {
-        try {
-          const data = JSON.parse(checkoutDataStr) as CheckoutData;
-          console.log("Parsed checkout data:", data);
-          setCheckoutData(data);
-        } catch (err) {
-          console.error("Error parsing checkout data:", err);
-        }
+      const data = JSON.parse(str) as CheckoutDataRaw;
+
+      if (!data.cartItems || !Array.isArray(data.cartItems)) {
+        setError("Invalid order information.");
+        setLoading(false);
+        return;
       }
 
-      // Load summary
-      if (summaryStr) {
-        try {
-          const summary = JSON.parse(summaryStr) as CheckoutSummary;
-          console.log("Parsed summary:", summary);
-          setCheckoutSummary(summary);
-        } catch (err) {
-          console.error("Error parsing summary:", err);
-        }
-      }
+      setCheckoutData({
+        ...data,
+        items: data.cartItems,
+      });
 
       setLoading(false);
-    } catch (err) {
-      console.error("Error loading checkout data:", err);
-      setError("An error occurred while loading order information.");
+    } catch {
+      setError("Failed to load order information.");
       setLoading(false);
     }
   }, []);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD"
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
 
   if (loading) {
     return (
@@ -145,29 +93,14 @@ export default function OrderSummary() {
     );
   }
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const selectedCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-  const shippingFee = checkoutData?.shippingFee || 0;
-  const discount = checkoutData?.discount || 0;
-  const tax = checkoutData?.tax || subtotal * 0.08;
-  const total = checkoutData?.total || subtotal + shippingFee + tax - discount;
-
-  if (cartItems.length === 0) {
+  if (error || !checkoutData) {
     return (
       <Card>
         <CardContent className="pt-6">
           <div className="text-center py-8">
-            <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-            <p className="text-yellow-600 font-medium">No items in your order</p>
-            <p className="text-sm text-gray-500 mt-2">
-              Please return to the cart and select items before checkout.
-            </p>
-            <Button 
-              variant="outline" 
-              className="mt-4"
-              onClick={() => window.history.back()}
-            >
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <p className="text-red-600 font-medium">{error}</p>
+            <Button variant="outline" className="mt-4" onClick={() => window.history.back()}>
               Back to Cart
             </Button>
           </div>
@@ -175,6 +108,9 @@ export default function OrderSummary() {
       </Card>
     );
   }
+
+  const { items, subtotal, shippingFee, discount, tax, total, couponCode, couponDetails, selectedCount } =
+    checkoutData;
 
   return (
     <div className="space-y-6">
@@ -185,25 +121,23 @@ export default function OrderSummary() {
             Your Order
           </CardTitle>
         </CardHeader>
+
         <CardContent>
           <div className="space-y-4 mb-6">
-            {cartItems.map((item) => (
+            {items.map((item) => (
               <div key={item.id} className="flex gap-3">
-                {item.image && (
-                  <img
-                    src={`http://localhost:3000/api${item.image}`}
-                    alt={item.name}
-                    className="w-16 h-16 rounded object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = "none";
-                    }}
-                  />
-                )}
+                <img
+                  src={`http://localhost:3000/api${item.image}`}
+                  alt={item.name}
+                  className="w-16 h-16 rounded object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+
                 <div className="flex-1">
                   <p className="font-medium text-sm">{item.name}</p>
-                  {item.subOccasion && (
-                    <p className="text-xs text-gray-500">{item.subOccasion.name}</p>
-                  )}
+
                   <div className="flex justify-between items-center mt-1">
                     <p className="text-sm">
                       {item.quantity} × {formatCurrency(item.price)}
@@ -219,50 +153,43 @@ export default function OrderSummary() {
 
           <Separator />
 
-          {checkoutData?.couponCode && (
+          {couponCode && couponDetails && (
             <div className="mt-6 space-y-3">
               <div className="flex items-center justify-between bg-gray-50 p-3 rounded">
                 <div>
                   <p className="text-sm font-medium">Applied Coupon</p>
-                  <p className="text-xs text-gray-500">{checkoutData.couponCode}</p>
+                  <p className="text-xs text-gray-500">{couponCode}</p>
                 </div>
+
                 <Badge className="bg-green-100 text-green-800">
-                  {checkoutSummary?.discountText || "Applied"}
+                  {couponDetails.discount_type === "percent"
+                    ? `${couponDetails.discount_value}% off`
+                    : `${formatCurrency(couponDetails.discount_value)} off`}
                 </Badge>
               </div>
             </div>
           )}
 
-          {/* Order Summary */}
           <div className="space-y-3 mt-6">
             <div className="flex justify-between">
-              <span className="text-gray-600">
-                Subtotal ({selectedCount} items)
-              </span>
-              <span>{checkoutSummary?.subtotal || formatCurrency(subtotal)}</span>
+              <span className="text-gray-600">Subtotal ({selectedCount} items)</span>
+              <span>{formatCurrency(subtotal)}</span>
             </div>
 
             <div className="flex justify-between">
               <span className="text-gray-600">Shipping Fee</span>
-              <span>
-                {checkoutSummary?.shippingFee ||
-                  (shippingFee > 0 ? formatCurrency(shippingFee) : "FREE")}
-              </span>
+              <span>{shippingFee > 0 ? formatCurrency(shippingFee) : "FREE"}</span>
             </div>
 
-            {tax > 0 && (
-              <div className="flex justify-between">
-                <span className="text-gray-600">VAT (8%)</span>
-                <span>{checkoutSummary?.tax || formatCurrency(tax)}</span>
-              </div>
-            )}
+            <div className="flex justify-between">
+              <span className="text-gray-600">VAT (8%)</span>
+              <span>{formatCurrency(tax)}</span>
+            </div>
 
             {discount > 0 && (
               <div className="flex justify-between text-green-600">
                 <span>Discount</span>
-                <span>
-                  {checkoutSummary?.discount || `-${formatCurrency(discount)}`}
-                </span>
+                <span>-{formatCurrency(discount)}</span>
               </div>
             )}
 
@@ -270,12 +197,12 @@ export default function OrderSummary() {
 
             <div className="flex justify-between text-lg font-bold">
               <span>Total</span>
-              <span>{checkoutSummary?.total || formatCurrency(total)}</span>
+              <span>{formatCurrency(total)}</span>
             </div>
 
             <div className="flex items-center gap-2 text-sm text-gray-500 pt-2">
               <Package className="h-4 w-4" />
-              <span>{cartItems.length} item types</span>
+              <span>{items.length} item types</span>
             </div>
           </div>
         </CardContent>
@@ -287,7 +214,6 @@ export default function OrderSummary() {
         </CardFooter>
       </Card>
 
-      {/* Security Badges */}
       <Card>
         <CardContent className="pt-6">
           <div className="grid grid-cols-2 gap-4">
@@ -298,6 +224,7 @@ export default function OrderSummary() {
               <p className="text-xs font-medium">Secure</p>
               <p className="text-xs text-gray-500">SSL 256-bit</p>
             </div>
+
             <div className="text-center">
               <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
                 <Lock className="h-5 w-5 text-green-600" />

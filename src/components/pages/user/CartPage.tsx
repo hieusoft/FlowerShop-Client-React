@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CartHeader from "@/components/blocks/cart/CartHeader";
 import CartItemsList from "@/components/blocks/cart/CartItemsList";
 import CartSummary from "@/components/blocks/cart/CartSummary";
@@ -10,14 +10,16 @@ import RecommendedProducts from "@/components/blocks/cart/RecommendedProducts";
 import { CartItemFlower, RecommendedProduct } from "../../../models/cart";
 
 export default function CartPage() {
-  const cartItems: CartItemFlower[] = localStorage.getItem("cart")
-    ? JSON.parse(localStorage.getItem("cart") as string)
-    : [
-  ];
-
-  const [items, setItems] = useState<CartItemFlower[]>(cartItems);
-  const [selectedItems, setSelectedItems] = useState<string[]>(cartItems.map(item => item.id));
+  const [items, setItems] = useState<CartItemFlower[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [savedItems, setSavedItems] = useState<CartItemFlower[]>([]);
+
+  useEffect(() => {
+    const data = localStorage.getItem("cart");
+    const parsed = data ? JSON.parse(data) : [];
+    setItems(parsed);
+    setSelectedItems(parsed.map((item: CartItemFlower) => item.id));
+  }, []);
 
   const recommendedProducts: RecommendedProduct[] = [
     {
@@ -46,7 +48,6 @@ export default function CartPage() {
     .filter(item => selectedItems.includes(item.id))
     .reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Handlers
   const handleSelectAll = (selected: boolean) => {
     setSelectedItems(selected ? items.map(item => item.id) : []);
   };

@@ -21,10 +21,13 @@ interface Recipient {
 
 interface ContactInfoStepProps {
   formData: { phone: string; fullName: string };
-  onInputChange: (field: string, value: string) => void;
+  onInputChange: (field: string, value: string | boolean | number) => void;
+
 }
 
 export default function ContactInfoStep({ formData, onInputChange }: ContactInfoStepProps) {
+  const [open, setOpen] = useState(false);
+
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [selectedRecipientId, setSelectedRecipientId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +40,7 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
         setIsLoading(true);
         const response = await RecipientService.fromUser();
         const data = response.data || [];
-
+        
         setRecipients(data);
 
         const defaultRecipient = data.find((r: Recipient) => r.isDefault);
@@ -62,19 +65,25 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
   // Helper to fill form
   const fillFormWithRecipient = (recipient: Recipient) => {
     onInputChange("fullName", recipient.fullName);
+   
     onInputChange("phone", recipient.phoneNumber);
     onInputChange("address", recipient.addressLine);
     onInputChange("province", recipient.province);
     onInputChange("ward", recipient.ward);
-    onInputChange("isNew", "false");
+    onInputChange("isNew", false);
   };
 
   const clearToManualInput = () => {
     setUseManualInput(true);
     setSelectedRecipientId(null);
     onInputChange("fullName", "");
+  
+
     onInputChange("phone", "");
-    onInputChange("isNew", "true");
+    onInputChange("address","");
+    onInputChange("province", "");
+    onInputChange("ward","");
+    onInputChange("isNew", true);
   };
 
   const handleRecipientSelect = (recipient: Recipient) => {
@@ -123,90 +132,98 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
               )}
             </div>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className="flex items-center justify-between w-full p-3 border rounded-md bg-white hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    <span className="font-medium">{triggerText}</span>
+        <Popover open={open} onOpenChange={setOpen}>
+  <PopoverTrigger asChild>
+    <button
+      type="button"
+      onClick={() => setOpen(!open)}
+      className="flex items-center justify-between w-full p-3 border rounded-md bg-white hover:bg-gray-50 transition-colors"
+    >
+      <div className="flex items-center gap-2">
+        <User className="h-4 w-4" />
+        <span className="font-medium">{triggerText}</span>
 
-                    {!useManualInput && selectedRecipient?.isDefault && (
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                        Default
-                      </span>
-                    )}
+        {!useManualInput && selectedRecipient?.isDefault && (
+          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+            Default
+          </span>
+        )}
 
-                    {useManualInput && (
-                      <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                        Manual Input
-                      </span>
-                    )}
-                  </div>
-                  <ChevronDown className="h-4 w-4" />
-                </button>
-              </PopoverTrigger>
+        {useManualInput && (
+          <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+            Manual Input
+          </span>
+        )}
+      </div>
+      <ChevronDown className="h-4 w-4" />
+    </button>
+  </PopoverTrigger>
 
-              {/* FULL WIDTH FIX */}
-              <PopoverContent
-                align="start"
-                sideOffset={4}
-                className="w-[var(--radix-popper-anchor-width)] p-0"
-              >
-                <div className="max-h-60 overflow-auto">
+  {/* FULL WIDTH FIX */}
+  <PopoverContent
+    align="start"
+    sideOffset={4}
+    className="w-[var(--radix-popper-anchor-width)] p-0"
+  >
+    <div className="max-h-60 overflow-auto">
 
-                  {/* Manual Mode Option */}
-                  <button
-                    type="button"
-                    onClick={clearToManualInput}
-                    className={`flex items-center justify-between w-full p-3 text-left hover:bg-gray-50 ${
-                      useManualInput ? "bg-blue-50" : ""
-                    }`}
-                  >
-                    <div>
-                      <div className="font-medium">Enter Manually</div>
-                      <div className="text-sm text-gray-500">Create a new recipient</div>
-                    </div>
+      {/* Manual Mode Option */}
+      <button
+        type="button"
+        onClick={() => {
+          clearToManualInput();
+          setOpen(false);        // 🔥 Auto close
+        }}
+        className={`flex items-center justify-between w-full p-3 text-left hover:bg-gray-50 ${
+          useManualInput ? "bg-blue-50" : ""
+        }`}
+      >
+        <div>
+          <div className="font-medium">Enter Manually</div>
+          <div className="text-sm text-gray-500">Create a new recipient</div>
+        </div>
 
-                    {useManualInput && (
-                      <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                        Selected
-                      </span>
-                    )}
-                  </button>
+        {useManualInput && (
+          <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+            Selected
+          </span>
+        )}
+      </button>
 
-                  <div className="border-t my-1"></div>
+      <div className="border-t my-1"></div>
 
-                  {/* Recipient List */}
-                  {recipients.map((recipient) => (
-                    <button
-                      key={recipient.recipientId}
-                      onClick={() => handleRecipientSelect(recipient)}
-                      type="button"
-                      className={`flex items-center justify-between w-full p-3 text-left hover:bg-gray-50 ${
-                        selectedRecipientId === recipient.recipientId ? "bg-blue-50" : ""
-                      }`}
-                    >
-                      <div>
-                        <div className="font-medium">{recipient.fullName}</div>
-                        <div className="text-sm text-gray-500">{recipient.phoneNumber}</div>
-                        {recipient.addressLine && (
-                          <div className="text-xs text-gray-400">{recipient.addressLine}</div>
-                        )}
-                      </div>
+      {/* Recipient List */}
+      {recipients.map((recipient) => (
+        <button
+          key={recipient.recipientId}
+          onClick={() => {
+            handleRecipientSelect(recipient);
+            setOpen(false);       // 🔥 Auto close
+          }}
+          type="button"
+          className={`flex items-center justify-between w-full p-3 text-left hover:bg-gray-50 ${
+            selectedRecipientId === recipient.recipientId ? "bg-blue-50" : ""
+          }`}
+        >
+          <div>
+            <div className="font-medium">{recipient.fullName}</div>
+            <div className="text-sm text-gray-500">{recipient.phoneNumber}</div>
+            {recipient.addressLine && (
+              <div className="text-xs text-gray-400">{recipient.addressLine}</div>
+            )}
+          </div>
 
-                      {recipient.isDefault && (
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                          Default
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
+          {recipient.isDefault && (
+            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+              Default
+            </span>
+          )}
+        </button>
+      ))}
+    </div>
+  </PopoverContent>
+</Popover>
+
           </div>
         )}
 
