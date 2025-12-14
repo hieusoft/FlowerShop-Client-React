@@ -8,8 +8,20 @@ import { ColumnDef } from "@tanstack/react-table"
 
 const columns: ColumnDef<object>[] = [
     {
-        accessorKey: "name",
-        header: "Name",
+        accessorKey: "order_code",
+        header: "Order code",
+        size: 300,
+        minSize: 300,
+    },
+    {
+        accessorKey: "status",
+        header: "Status",
+        size: 300,
+        minSize: 300,
+    },
+    {
+        accessorKey: "total_price",
+        header: "Total price",
         size: 300,
         minSize: 300,
     },
