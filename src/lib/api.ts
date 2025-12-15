@@ -1,5 +1,7 @@
 
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { accessSync } from "fs";
+import { redirect } from "next/dist/server/api-utils";
 
 export const ACCESS_TOKEN_KEY = "auth-access-token";
 
@@ -61,26 +63,40 @@ clientApiInstance.interceptors.response.use(
   async (error: AxiosError) => {
     if (error.response?.status === 401) {
       const originalRequest = error.config as AxiosRequestConfigWithRetry;
-      if (!originalRequest || originalRequest._retry) return Promise.reject(error);
+
+      if (!originalRequest || originalRequest._retry) {
+        return Promise.reject(error);
+      }
 
       originalRequest._retry = true;
 
       try {
-    
         const refreshResponse = await axios.post(
           `/api/auth/refresh`,
           {},
           { withCredentials: true }
         );
 
+        if (refreshResponse.status === 401) {
+          removeAccessToken();
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
+          return Promise.reject(error);
+        }
+
         const newAccessToken = refreshResponse.data.newAccessToken;
         setAccessToken(newAccessToken);
+
         originalRequest.headers = originalRequest.headers || {};
         originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
 
         return clientApiInstance(originalRequest);
       } catch (e) {
         removeAccessToken();
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
         return Promise.reject(e);
       }
     }

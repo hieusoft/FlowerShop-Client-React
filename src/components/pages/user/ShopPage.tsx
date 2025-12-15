@@ -6,15 +6,19 @@ import { cn } from "@/lib/utils";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import ProductService from "@/lib/ProductService";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
 import {
     Pagination,
     PaginationContent,
     PaginationItem,
     PaginationPrevious,
-    PaginationLink,
-    PaginationNext
+    PaginationNext,
+    PaginationLink
 } from "@/components/ui/pagination";
+import ProductService from "@/lib/api/ProductService";
+import OccasionService from "@/lib/api/OccasionService";
 
 export default function ShopPage() {
     const { occasion, suboccasion } = useParams();
@@ -22,12 +26,14 @@ export default function ShopPage() {
 
     const [bouquets, setBouquets] = useState<any[]>([]);
     const [occasionData, setOccasionData] = useState<any>(null);
+    const [currentSuboccasion, setCurrentSuboccasion] = useState<any>(null);
     const [isSuboccasionValid, setIsSuboccasionValid] = useState(true);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [priceRange, setPriceRange] = useState<[number, number]>([20, 1000]);
     const [sortBy, setSortBy] = useState<string>("newest");
+    const [loading, setLoading] = useState(true);
     const limit = 12;
 
     const sortOptions = [
@@ -54,23 +60,42 @@ export default function ShopPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const res = await ProductService.GetOccasionByName(occasion as string);
+                setLoading(true);
+                const encodedOccasion = encodeURIComponent(occasion as string);
+                const res = await OccasionService.fromId(encodedOccasion);
                 const data = res.data;
+                
                 if (!data) {
-                    setBouquets([])
+                    setOccasionData(null);
+                    setIsSuboccasionValid(false);
                     return;
                 }
                 setOccasionData(data);
 
                 if (suboccasion && data.subOccasions) {
-                    const valid = data.subOccasions.some((sub: any) => sub.name === suboccasion);
-                    setIsSuboccasionValid(valid);
+                    const decodedSuboccasion = decodeURIComponent(suboccasion as string);
+
+                    const foundSuboccasion = data.subOccasions.find(
+                        (sub: any) => sub.name.toLowerCase() === decodedSuboccasion.toLowerCase()
+                    );
+                    
+                    if (foundSuboccasion) {
+                        setIsSuboccasionValid(true);
+                        setCurrentSuboccasion(foundSuboccasion); 
+                    } else {
+                        setIsSuboccasionValid(false);
+                        setCurrentSuboccasion(null);
+                    }
                 } else {
                     setIsSuboccasionValid(true);
+                    setCurrentSuboccasion(null);
                 }
             } catch (error) {
                 console.error(error);
-                setBouquets([])
+                setOccasionData(null);
+                setIsSuboccasionValid(false);
+            } finally {
+                setLoading(false);
             }
         };
         fetchData();
@@ -79,16 +104,15 @@ export default function ShopPage() {
 
     useEffect(() => {
         if (occasionData && !isSuboccasionValid) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setBouquets([])
+            setBouquets([]);
         }
-    }, [occasionData, isSuboccasionValid, router]);
+    }, [occasionData, isSuboccasionValid]);
 
     const fetchBouquets = async (pageNumber: number) => {
         if (!occasionData || !isSuboccasionValid) return;
 
         try {
-            const res = await ProductService.GetAllProducts({
+            const res = await ProductService.list({
                 page: pageNumber,
                 limit,
                 minPrice: priceRange[0],
@@ -108,6 +132,63 @@ export default function ShopPage() {
         fetchBouquets(page);
     }, [page, priceRange, sortBy, occasionData, isSuboccasionValid]);
 
+    const getDisplayInfo = () => {
+        if (currentSuboccasion) {
+            return {
+                title: currentSuboccasion.name,
+                description: currentSuboccasion.description || "Browse our collection"
+            };
+        } else if (occasionData) {
+            return {
+                title: occasionData.name,
+                description: occasionData.description || "Browse our collection"
+            };
+        }
+        return {
+            title: "Shop",
+            description: "Browse our collection"
+        };
+    };
+
+    const displayInfo = getDisplayInfo();
+
+    if (loading) {
+        return (
+            <div className="container mx-auto py-20 px-4 text-center">
+                <div className="text-lg">Loading...</div>
+            </div>
+        );
+    }
+
+    if (!occasionData || !isSuboccasionValid) {
+        return (
+            <div className="container mx-auto py-20 px-4 text-center">
+                <Card className="max-w-md mx-auto">
+                    <CardContent className="pt-6">
+                        <div className="text-6xl mb-4">404</div>
+                        <h2 className="text-2xl font-bold mb-2">Category Not Found</h2>
+                        <p className="text-gray-600 mb-6">
+                            {!occasionData 
+                                ? "The category you're looking for doesn't exist."
+                                : "The sub-category you're looking for doesn't exist in this category."
+                            }
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <Button onClick={() => router.push('/')}>
+                                Go to Homepage
+                            </Button>
+                            <Button 
+                                variant="outline" 
+                                onClick={() => router.back()}
+                            >
+                                Go Back
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto flex flex-col lg:flex-row mb-20 gap-4">
@@ -155,9 +236,9 @@ export default function ShopPage() {
                 <div className="mb-6">
                     <div className="space-y-2">
                         <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-                            {occasionData?.name || "Shop"}
+                            {displayInfo.title}
                         </h3>
-                        <p className="text-gray-600">{occasionData?.description || "Browse our collection"}</p>
+                        <p className="text-gray-600">{displayInfo.description}</p>
                         <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
                             <span className="font-semibold text-gray-800">
                                 {sortOptions.find(opt => opt.value === sortBy)?.label}
@@ -170,51 +251,60 @@ export default function ShopPage() {
                 </div>
 
                 {bouquets.length === 0 ? (
-                    <p className="text-center py-10 text-gray-500">No bouquets found.</p>
-                ) : (
-                    <div className="w-full grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
-                        {bouquets.map((bouquet, index) => (
-                            <ProductCard
-                                key={index}
-                                product={bouquet}
-                                occasion={occasion as string}
-                            />
-                        ))}
-
+                    <div className="text-center py-10">
+                        <p className="text-gray-500 mb-4">No bouquets found in this category.</p>
+                        <Button 
+                            variant="outline" 
+                            onClick={() => router.push('/')}
+                        >
+                            Browse Other Categories
+                        </Button>
                     </div>
-                )}
+                ) : (
+                    <>
+                        <div className="w-full grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
+                            {bouquets.map((bouquet, index) => (
+                                <ProductCard
+                                    key={index}
+                                    product={bouquet}
+                                    occasion={occasion as string}
+                                />
+                            ))}
+                        </div>
 
-                <Pagination>
-                    <PaginationContent>
-                        <PaginationItem>
-                            <PaginationPrevious
-                                onClick={() => page > 1 && setPage(page - 1)}
-                                className={page === 1 ? "pointer-events-none opacity-50" : ""}
-                            />
-                        </PaginationItem>
-
-                        {[...Array(totalPages)].map((_, index) => {
-                            const pageNumber = index + 1;
-                            return (
-                                <PaginationItem key={pageNumber}>
-                                    <PaginationLink
-                                        isActive={page === pageNumber}
-                                        onClick={() => setPage(pageNumber)}
-                                    >
-                                        {pageNumber}
-                                    </PaginationLink>
+                        <Pagination>
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        onClick={() => page > 1 && setPage(page - 1)}
+                                        className={page === 1 ? "pointer-events-none opacity-50" : ""}
+                                    />
                                 </PaginationItem>
-                            );
-                        })}
 
-                        <PaginationItem>
-                            <PaginationNext
-                                onClick={() => page < totalPages && setPage(page + 1)}
-                                className={page === totalPages ? "pointer-events-none opacity-50" : ""}
-                            />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
+                                {[...Array(totalPages)].map((_, index) => {
+                                    const pageNumber = index + 1;
+                                    return (
+                                        <PaginationItem key={pageNumber}>
+                                            <PaginationLink
+                                                isActive={page === pageNumber}
+                                                onClick={() => setPage(pageNumber)}
+                                            >
+                                                {pageNumber}
+                                            </PaginationLink>
+                                        </PaginationItem>
+                                    );
+                                })}
+
+                                <PaginationItem>
+                                    <PaginationNext
+                                        onClick={() => page < totalPages && setPage(page + 1)}
+                                        className={page === totalPages ? "pointer-events-none opacity-50" : ""}
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
+                    </>
+                )}
             </section>
         </div>
     );

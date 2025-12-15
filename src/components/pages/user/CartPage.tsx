@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CartHeader from "@/components/blocks/cart/CartHeader";
 import CartItemsList from "@/components/blocks/cart/CartItemsList";
 import CartSummary from "@/components/blocks/cart/CartSummary";
@@ -10,38 +10,16 @@ import RecommendedProducts from "@/components/blocks/cart/RecommendedProducts";
 import { CartItemFlower, RecommendedProduct } from "../../../models/cart";
 
 export default function CartPage() {
-  const cartItems: CartItemFlower[] = [
-    {
-      id: "693696469b75237114deb8d4",
-      name: "Pink Romance",
-      description: "A romantic bouquet dominated by pink hues...",
-      price: 128,
-      quantity: 2,
-      image: "/uploads/bouquets/1765369634830-dedi74do4ht.png",
-      subOccasion: {
-        id: "6935c4bec6b6b0fc2c4e6200",
-        name: "Romance",
-        description: "Celebrate the magic of love with romantic gestures..."
-      }
-    },
-    {
-      id: "693696469b75237114deb8d5",
-      name: "Sunshine Delight",
-      description: "Bright yellow roses to bring happiness and joy",
-      price: 98,
-      quantity: 1,
-      image: "/uploads/bouquets/1765369634830-dedi74do4ht.png",
-      subOccasion: {
-        id: "6935c4bec6b6b0fc2c4e6201",
-        name: "Friendship",
-        description: "Perfect for friends and cheerful moments"
-      }
-    }
-  ];
-
-  const [items, setItems] = useState<CartItemFlower[]>(cartItems);
-  const [selectedItems, setSelectedItems] = useState<string[]>(cartItems.map(item => item.id));
+  const [items, setItems] = useState<CartItemFlower[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [savedItems, setSavedItems] = useState<CartItemFlower[]>([]);
+
+  useEffect(() => {
+    const data = localStorage.getItem("cart");
+    const parsed = data ? JSON.parse(data) : [];
+    setItems(parsed);
+    setSelectedItems(parsed.map((item: CartItemFlower) => item.id));
+  }, []);
 
   const recommendedProducts: RecommendedProduct[] = [
     {
@@ -70,7 +48,6 @@ export default function CartPage() {
     .filter(item => selectedItems.includes(item.id))
     .reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Handlers
   const handleSelectAll = (selected: boolean) => {
     setSelectedItems(selected ? items.map(item => item.id) : []);
   };

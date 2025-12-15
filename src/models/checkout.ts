@@ -1,18 +1,23 @@
+import { CartItemFlower } from "./cart";
+
 export interface CheckoutFormData {
-  email: string;
   phone: string;
   fullName: string;
   address: string;
   province: string;
   ward: string;
   note: string;
-  shippingMethod: string;
   paymentMethod: string;
-  useShippingAddress: boolean;
   saveInfo: boolean;
   acceptTerms: boolean;
   isNew: boolean;
   giftMessage: string;
+  deliveryDate: string;
+  deliveryTime: string;
+  tax: number;
+  fee: number;
+  cartItems: CartItemFlower[];
+  couponCode: string | null;
 }
 
 export interface CheckoutState {

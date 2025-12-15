@@ -53,6 +53,7 @@ export function ProductCard({
         }
 
         localStorage.setItem("cart", JSON.stringify(cart));
+        window.dispatchEvent(new Event("cartUpdated"));
 
         toast.success("Đã thêm vào giỏ hàng 🛒", {
             description: product.name,

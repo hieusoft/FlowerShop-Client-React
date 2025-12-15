@@ -70,7 +70,6 @@ export function HeaderClient(
         setNavValue(isMobileExpanded ? "header-bouquets" : "");
     }, [isMobileExpanded]);
 
-    // ----------------- Cart Realtime -----------------
     useEffect(() => {
         const updateCartQty = () => {
             const cart = JSON.parse(localStorage.getItem("cart") || "[]");
