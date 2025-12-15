@@ -80,9 +80,6 @@ clientApiInstance.interceptors.response.use(
 
         if (refreshResponse.status === 401) {
           removeAccessToken();
-          if (typeof window !== "undefined") {
-            window.location.href = "/login";
-          }
           return Promise.reject(error);
         }
 
@@ -95,9 +92,6 @@ clientApiInstance.interceptors.response.use(
         return clientApiInstance(originalRequest);
       } catch (e) {
         removeAccessToken();
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
-        }
         return Promise.reject(e);
       }
     }
