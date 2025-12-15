@@ -66,7 +66,7 @@ export function ProductCard({
                 <Link href={`/shop/${occasion}/${product.subOccasionId?.name}/${product.id}`}>
                     <img
                         className="w-full h-full object-contain p-4 transition-transform duration-300 group-hover:scale-110 cursor-pointer"
-                        src={`http://54.254.156.167:8080${product.images?.[0] || ""}`}
+                        src={process.env.NEXT_PUBLIC_API_ROOT + (product.images?.[0] || "")}
                         alt={product.name}
                     />
                 </Link>

@@ -1,8 +1,43 @@
+"use client";
+
 import { DashboardLayout } from "@/components/layouts/dashboard";
 import { Card, CardThumbnail, CardHeader, CardDescription } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { cn, FormattableUnit, formatUnit, formatWhole } from "@/lib/utils";
+import { AreaChart, Area, LineChart, Line, YAxis, BarChart, Bar, XAxis } from "recharts";
+import { ClassNameValue } from "tailwind-merge";
 
-const funnelData = [
+function randomData() {
+    let value: number = Math.random() * 5 + 2.5;
+    let velocity: number = Math.random();
+    return new Array(30).fill("").map(x => {
+        value += velocity;
+        velocity = 1 + velocity / 2 - value / 5 + (Math.random() - 0.5) + 10 * (Math.random() - 0.5) ** 4;
+        return { value }
+    });
+}
+
+const smallCardBasises = 
+    "basis-1/1 @md/carousel:basis-1/2 @xl/carousel:basis-1/3 @3xl/carousel:basis-1/4 @5xl/carousel:basis-1/5 @7xl/carousel:basis-1/6"
+
+const largeCardBasises = 
+    "basis-1/1 @xl/carousel:basis-1/2 @3xl/carousel:basis-1/3 @6xl/carousel:basis-1/4"
+
+
+
+
+
+
+const performanceData = [
+    {
+        type: "revenue",
+        name: "Revenue",
+        count: 25829000,
+        unit: "currency/vnd"
+    },
+];
+
+const conversionData = [
     {
         type: "impression",
         name: "Impressions",
@@ -38,60 +73,259 @@ const funnelData = [
         name: "Completed orders",
         count: 2869,
     },
+];
+
+const vitalsData = [
+    {
+        type: "overall",
+        name: "Overall",
+        lcp: { average: 0.74, thresholds: [0.9, 0.07, 0.03] },
+        inp: { average: 0.14, thresholds: [0.85, 0.09, 0.06] },
+        cls: { average: 0.01, thresholds: [0.98, 0.01, 0.01] },
+    },
+    {
+        type: "home-page",
+        name: "Home page",
+        lcp: { average: 0.74, thresholds: [0.9, 0.07, 0.03] },
+        inp: { average: 0.14, thresholds: [0.85, 0.09, 0.06] },
+        cls: { average: 0.01, thresholds: [0.98, 0.01, 0.01] },
+    },
+    {
+        type: "list-pages",
+        name: "List pages",
+        lcp: { average: 0.74, thresholds: [0.9, 0.07, 0.03] },
+        inp: { average: 0.14, thresholds: [0.85, 0.09, 0.06] },
+        cls: { average: 0.01, thresholds: [0.98, 0.01, 0.01] },
+    },
+    {
+        type: "item-pages",
+        name: "Item pages",
+        lcp: { average: 0.74, thresholds: [0.9, 0.07, 0.03] },
+        inp: { average: 0.14, thresholds: [0.85, 0.09, 0.06] },
+        cls: { average: 0.01, thresholds: [0.98, 0.01, 0.01] },
+    },
 ]
 
-const cardBasises = 
-    "basis-1/1 @md/carousel:basis-1/2 @xl/carousel:basis-1/3 @3xl/carousel:basis-1/4 @5xl/carousel:basis-1/5 @7xl/carousel:basis-1/6"
+const trendsData = [
+    {
+        type: "most-view-items",
+        name: "Most viewed items",
+        data: [
+            { name: "Bouquet #4" },
+            { name: "Bouquet #2" },
+            { name: "Bouquet #10" },
+            { name: "Bouquet #6" },
+            { name: "Bouquet #9" },
+            { name: "Bouquet #13" },
+            { name: "Bouquet #3" },
+            { name: "Bouquet #7" },
+        ]
+    },
+]
 
-// TODO Implement page
+
+
+
 export default function DashboardPage() {
-    return <DashboardLayout>
-        <h2 className="font-heading text-3xl">Funnel</h2>
-        <Carousel className="my-4 -mx-4 border-y" opts={{ align: "start" }}>
-          <CarouselContent>
-            {funnelData.map((item, index) => (
-              <CarouselItem className={cardBasises} key={index}>
-                <div className="h-full">
-                  <Card className="h-full border-0 border-x -ml-px rounded-none">
-                    <CardHeader className="text-sm">
-                        <h3>
-                            <span className="block text-2xl font-heading">
-                                {item.count.toLocaleString("en-US")}
-                            </span>
-                            <span>
-                                {item.name}
-                            </span>
-                        </h3>
-                    </CardHeader>
-                    <CardDescription>
-                        {index != 0 && <>
-                            <div className="leading-tight text-xs">
-                                <span className="text-lg font-bold font-heading">
-                                    {(item.count / funnelData[index - 1].count * 100).toLocaleString("en-US")}%
-                                </span>
-                                <span>
-                                    {" "}rate
-                                </span>
-                            </div>
-                        </>}
-                        {index > 1 && <>
-                            <div className="leading-tight text-xs">
-                                <span className="text-lg font-bold font-heading">
-                                    {(item.count / funnelData[0].count * 100).toLocaleString("en-US")}%
-                                </span>
-                                <span>
-                                    {" "}initial
-                                </span>
-                            </div>
-                        </>}
-                    </CardDescription>
-                  </Card>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
-    </DashboardLayout>
+    return (
+        <DashboardLayout breadcrumb={["Admin", "Overview"]}>
+            <h2 className="font-heading text-3xl">Notifications</h2>
+            <Card className="my-4 py-4 -mx-4 border-x-0 rounded-none">
+                <CardDescription className="text-center">
+                    No recent notifications.
+                </CardDescription>
+            </Card>
+            <h2 className="font-heading text-3xl">Performance</h2>
+            <Carousel className="my-4 -mx-4 border-y" opts={{ align: "start" }}>
+                <CarouselContent>
+                    {performanceData.map((item, index) => (
+                    <CarouselItem className={largeCardBasises} key={index}>
+                        <div className="h-full">
+                        <Card className="h-full border-0 border-x -ml-px rounded-none">
+                            <CardThumbnail className="border-b-0 h-30 p-4 -mb-6 aspect-auto">
+                                <SimpleChart data={randomData()} dataKey="value" color={index} />
+                            </CardThumbnail>
+                            <CardHeader className="text-sm">
+                                <h3>
+                                    <span className="block text-2xl font-heading">
+                                        {formatUnit(item.count, item.unit as FormattableUnit)}
+                                    </span>
+                                    <span>
+                                        {item.name}
+                                    </span>
+                                </h3>
+                            </CardHeader>
+                        </Card>
+                        </div>
+                    </CarouselItem>
+                    ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+            </Carousel>
+            <h2 className="font-heading text-3xl">Conversion</h2>
+            <Carousel className="my-4 -mx-4 border-y" opts={{ align: "start" }}>
+                <CarouselContent>
+                    {conversionData.map((item, index) => (
+                    <CarouselItem className={smallCardBasises} key={index}>
+                        <div className="h-full">
+                        <Card className="h-full border-0 border-x -ml-px rounded-none">
+                            <CardThumbnail className="border-b-0 h-30 p-4 -mb-6 aspect-auto">
+                                <SimpleChart data={randomData()} dataKey="value" color={index} />
+                            </CardThumbnail>
+                            <CardHeader className="text-sm">
+                                <h3>
+                                    <span className="block text-2xl font-heading">
+                                        {formatWhole(item.count)}
+                                    </span>
+                                    <span>
+                                        {item.name}
+                                    </span>
+                                </h3>
+                            </CardHeader>
+                            <CardDescription>
+                                {index != 0 && <>
+                                    <div className="leading-tight text-xs">
+                                        <span className="text-lg font-bold font-heading">
+                                            {(item.count / conversionData[index - 1].count * 100).toLocaleString("en-US")}%
+                                        </span>
+                                        <span>
+                                            {" "}rate
+                                        </span>
+                                    </div>
+                                </>}
+                                {index > 1 && <>
+                                    <div className="leading-tight text-xs">
+                                        <span className="text-lg font-bold font-heading">
+                                            {(item.count / conversionData[0].count * 100).toLocaleString("en-US")}%
+                                        </span>
+                                        <span>
+                                            {" "}rate from initial
+                                        </span>
+                                    </div>
+                                </>}
+                            </CardDescription>
+                        </Card>
+                        </div>
+                    </CarouselItem>
+                    ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+            </Carousel>
+            <h2 className="font-heading text-3xl">Trends</h2>
+            <Carousel className="my-4 -mx-4 border-y" opts={{ align: "start" }}>
+                <CarouselContent>
+                    {trendsData.map((item, index) => (
+                    <CarouselItem className={largeCardBasises} key={index}>
+                        <div className="h-full">
+                            <Card className="h-full border-0 border-x -ml-px rounded-none">
+                                <CardHeader>
+                                    <h3>
+                                        {item.name}
+                                    </h3>
+                                </CardHeader>
+                                <CardDescription>
+                                    <ol className="flex flex-col gap-2">
+                                        {item.data.map((listItem, index) => (
+                                            <li key={index} className="flex gap-2 items-center">
+                                                <span className="flex items-center justify-center font-heading text-bold size-8 border bg-background rounded-full text-lg">
+                                                    {index + 1}
+                                                </span>
+                                                <span className="line-clamp-2 text-xs flex-1"> 
+                                                    {listItem.name}
+                                                </span>
+                                                <SimpleChart 
+                                                    className="w-20 h-8"
+                                                    data={randomData()} 
+                                                    dataKey="value" color={0} />
+                                            </li>
+                                        ))}
+                                    </ol>
+                                </CardDescription>
+                            </Card>
+                        </div>
+                    </CarouselItem>
+                    ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+            </Carousel>
+            <h2 className="font-heading text-3xl">Web vitals</h2>
+            <Carousel className="my-4 -mx-4 border-y" opts={{ align: "start" }}>
+                <CarouselContent>
+                    {vitalsData.map((item, index) => (
+                    <CarouselItem className={largeCardBasises} key={index}>
+                        <div className="h-full">
+                        <Card className="h-full border-0 border-x -ml-px rounded-none">
+                            <CardHeader>
+                                <h3>
+                                    {item.name}
+                                </h3>
+                            </CardHeader>
+                            <CardDescription>
+                                {(["lcp", "inp", "cls"] as ("lcp" | "inp" | "cls")[]).map((stat) => (
+                                    <div className="leading-tight text-xs" key={stat}>
+                                        <span className="text-2xl font-heading">
+                                            {stat == "cls" ? formatWhole(item[stat].average, 3) : formatWhole(item[stat].average, 3) + "s"}
+                                        </span>
+                                        <span>
+                                            {" " + stat.toUpperCase()}
+                                        </span>
+                                        <div 
+                                            className="relative grid h-3 py-1 -mx-px *:mx-px *:rounded-xs mb-2" 
+                                            style={{ gridTemplateColumns: item[stat].thresholds.map(x => x + "fr").join(" ") }}
+                                        >
+                                            <div className="bg-green-600 dark:bg-green-500"></div>
+                                            <div className="bg-orange-600 dark:bg-orange-500"></div>
+                                            <div className="bg-red-700 dark:bg-red-500"></div>
+                                            <div className="absolute bg-foreground w-px inset-y-0 left-3/4"></div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </CardDescription>
+                        </Card>
+                        </div>
+                    </CarouselItem>
+                    ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+            </Carousel>
+        </DashboardLayout>
+    )
+}
+
+function SimpleChart(
+    { data, dataKey, color, className } : {
+        data: object[],
+        dataKey: string,
+        color: number
+        className?: ClassNameValue
+    }
+) {
+    color = (color % 5) + 1;
+    // eslint-disable-next-line react-hooks/purity
+    const key: string = Math.random().toString().substring(2);
+
+    return (
+        <AreaChart
+            className={cn("h-[calc(100%+10px)] w-[calc(100%+10px)] -m-[5px]", className)} responsive
+            data={data}
+        >
+            <defs>
+                <linearGradient id={`chart-fill-${key}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={`var(--chart-${color})`} stopOpacity={0.8} />
+                    <stop offset="95%" stopColor={`var(--chart-${color})`} stopOpacity={0} />
+                </linearGradient>
+            </defs>
+            <YAxis width={0} visibility="hidden" domain={([min, max]) => [min - (max - min) * 0.1, max]} />
+            <Area 
+                type="monotone" dataKey={dataKey} dot={false} activeDot={false} 
+                isAnimationActive={false}
+                stroke={`var(--chart-${color})`} strokeWidth={1.2}
+                fill={`url(#chart-fill-${key})`}
+            />
+        </AreaChart>
+    )
 }

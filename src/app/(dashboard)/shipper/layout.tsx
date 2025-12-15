@@ -1,5 +1,6 @@
 "use client";
 
+import "../globals.css";
 import { ShipperSidebar } from "@/components/blocks/dashboard/shipper-sidebar";
 import { AdminContext } from "@/components/providers/contexts/admin-context"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";

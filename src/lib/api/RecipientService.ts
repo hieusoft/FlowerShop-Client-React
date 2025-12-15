@@ -18,6 +18,7 @@ function deleteOne(id: number | string) {
 }
 
 export default {
+    list,
     fromUser,
     fromSelf,
     post,

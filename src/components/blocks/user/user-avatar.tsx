@@ -9,9 +9,11 @@ export function UserAvatar(
     } & AvatarProps
 ) {
     return <Avatar {...props}>
-        <AvatarImage 
-            className="block"
-            src={user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}`} />
+        {!!user && (
+            <AvatarImage 
+                className="block"
+                src={user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.email}`} />
+        )}
         <AvatarFallback className="text-2xl">
             {user?.userName?.charAt(0) || <UserIcon className="size-5" />}
         </AvatarFallback>

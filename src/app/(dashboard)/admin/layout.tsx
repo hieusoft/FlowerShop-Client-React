@@ -1,5 +1,6 @@
 "use client";
 
+import "../globals.css";
 import { AdminSidebar } from "@/components/blocks/dashboard/admin-sidebar";
 import { Root } from "@/components/layouts/root"
 import { AdminContext, AdminContextProvider } from "@/components/providers/contexts/admin-context"

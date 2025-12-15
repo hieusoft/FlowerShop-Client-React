@@ -1,9 +1,29 @@
 import { HasTimestamp } from "./common";
 
 export type Bouquet = {
+    id: string,
     name: string,
     description: string,
     price: number,
-    subOccasionId: number,
-    images: string[],
+    subOccasionId: string,
+    images: string[] | BouquetImageUpload[],
 } & HasTimestamp
+
+export type BouquetImageUpload = 
+    { keep: true }
+    | { base64: string }
+    | { url: string }
+
+export type BouquetQuery = {
+    search_query?: string,
+    name?: string,
+    subOccasionId?: string,
+    minPrice?: number,
+    maxPrice?: number,
+    startDate?: Date,
+    endDate?: Date,
+    page?: number,
+    limit: number,
+    sortBy?: string,
+    order?: "asc" | "desc"
+}
