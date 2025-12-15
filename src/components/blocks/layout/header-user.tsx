@@ -9,6 +9,7 @@ import { Spinner } from "@/components/ui/spinner";
 import Link from "next/link";
 import { UserAvatar } from "../user/user-avatar";
 import { NavigationMenuLink } from "@radix-ui/react-navigation-menu";
+import { UserLogOutButton } from "../user/user-log-out-button";
 
 export function HeaderUser({ className }: { className?: string }) {
   const { user, userBusy } = useUser();
@@ -60,9 +61,11 @@ export function HeaderUser({ className }: { className?: string }) {
                 </NavigationMenuLink>
 
                 <NavigationMenuLink asChild>
-                  <Button variant="outline" asChild>
-                    <Link href="/logout">Log out</Link>
-                  </Button>
+                  <UserLogOutButton>
+                    <Button variant="outline">
+                      Log out
+                    </Button>
+                  </UserLogOutButton>
                 </NavigationMenuLink>
               </div>
             </div>

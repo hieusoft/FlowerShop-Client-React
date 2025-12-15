@@ -41,7 +41,7 @@ export function getUserClaims(): null | Record<string, string> {
 }
 
 export function removeAccessToken() {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  delete localStorage[ACCESS_TOKEN_KEY];
   delete clientApiInstance.defaults.headers.common["Authorization"];
 }
 
