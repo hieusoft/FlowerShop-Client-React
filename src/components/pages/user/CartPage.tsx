@@ -21,29 +21,7 @@ export default function CartPage() {
     setSelectedItems(parsed.map((item: CartItemFlower) => item.id));
   }, []);
 
-  const recommendedProducts: RecommendedProduct[] = [
-    {
-      id: "5",
-      name: "Túi xách da bò",
-      price: 450000,
-      originalPrice: 650000,
-      image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=150",
-      rating: 4.5,
-      reviewCount: 24,
-      discount: 31
-    },
-    {
-      id: "6",
-      name: "Đồng hồ thông minh",
-      price: 1890000,
-      originalPrice: 2490000,
-      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150",
-      rating: 4.8,
-      reviewCount: 156,
-      discount: 24
-    }
-  ];
-
+  
   const subtotal = items
     .filter(item => selectedItems.includes(item.id))
     .reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -149,13 +127,7 @@ export default function CartPage() {
         </div>
       </div>
 
-      <div className="mt-12">
-        <RecommendedProducts
-          products={recommendedProducts}
-          onAddToCart={handleAddRecommended}
-          onQuickView={handleQuickView}
-        />
-      </div>
+      
     </div>
   );
 }
