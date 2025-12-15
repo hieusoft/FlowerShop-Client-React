@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CheckCircle,
   Download,
@@ -24,21 +24,59 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
-import { useRouter } from "next/navigation";
-import { useSearchParams, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
+import OrderService from "@/lib/api/OrderService";
+import ProductService from "@/lib/api/ProductService";
 
 export default function ThankYouPage() {
   const router = useRouter();
   const params = useParams();
-
   const searchParams = useSearchParams();
 
-  const orderId = params.orderId as string;
-
+  const orderId = params.order_id as string | undefined;
   const status = searchParams.get("status");
 
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (!orderId) {
+      router.replace("/");
+      return;
+    }
+
+    if (status && status !== "SUCCESS") {
+      router.replace("/");
+      return;
+    }
+
+    const fetchOrder = async () => {
+      try {
+        setLoading(true);
+        setError(false);
+
+        const res = await OrderService.getOrderByOrderId(orderId);
+        const orderData = res.data;
+
+        const itemsWithProduct = await Promise.all(
+          (orderData.items || []).map(async (item: any) => {
+            const productRes = await ProductService.fromId(item.bouquet_id);
+            return { ...item, product: productRes.data };
+          })
+        );
+
+        setOrder({ ...orderData, items: itemsWithProduct });
+      } catch (err) {
+        console.error("Fetch order failed:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrder();
+  }, [orderId, status, router]);
 
   useEffect(() => {
     const createConfetti = () => {
@@ -58,7 +96,7 @@ export default function ThankYouPage() {
 
         const animation = confetti.animate(
           [
-            { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
+            { transform: "translate(0, 0) rotate(0deg)", opacity: 1 },
             {
               transform: `translate(${(Math.random() - 0.5) * 200}px, ${
                 window.innerHeight
@@ -77,13 +115,12 @@ export default function ThankYouPage() {
     };
 
     createConfetti();
-
-    const timer1 = setTimeout(createConfetti, 300);
-    const timer2 = setTimeout(createConfetti, 600);
+    const t1 = setTimeout(createConfetti, 300);
+    const t2 = setTimeout(createConfetti, 600);
 
     return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
+      clearTimeout(t1);
+      clearTimeout(t2);
     };
   }, []);
 
@@ -95,58 +132,72 @@ export default function ThankYouPage() {
           text: "I just completed my purchase successfully!",
           url: window.location.href,
         });
-      } catch (error) {
-        console.log("Error sharing:", error);
+      } catch (err) {
+        console.log("Share canceled");
       }
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(window.location.href);
       alert("Link copied to clipboard!");
     }
   };
 
   const handleDownload = () => {
-    const orderId1 = `ORD-${Date.now().toString().slice(-8)}`;
-    const invoiceContent = `
-INVOICE #${orderId1}
-============================
-Date: ${new Date().toLocaleDateString()}
-Status: PAID
--------------------------
-ITEMS:
-• Premium Widget: $49.99
-• Extended Warranty: $9.99
-• Shipping: $5.99
--------------------------
-SUBTOTAL: $59.98
-SHIPPING: $5.99
--------------------------
-TOTAL: $65.97
-============================
-Thank you for your purchase!
-    `;
+    if (!order) return;
 
-    const blob = new Blob([invoiceContent], { type: "text/plain" });
-    const url = window.URL.createObjectURL(blob);
+    const lines = [
+      "==============================",
+      "        ORDER INVOICE",
+      "==============================",
+      `Order ID: #${order.id}`,
+      `Date: ${new Date(order.created_at).toLocaleDateString()}`,
+      `Status: PAID`,
+      "------------------------------",
+      "ITEMS:",
+      ...order.items.map(
+        (item: any, index: number) =>
+          `${index + 1}. ${item.product.name}  x${item.quantity}  -  $${
+            item.price
+          }`
+      ),
+      "------------------------------",
+      `Subtotal: $${order.total_price - order.shipping_fee - order.vat_amount}`,
+      `Shipping: $${order.shipping_fee}`,
+      `VAT: $${order.vat_amount}`,
+      "------------------------------",
+      `TOTAL: $${order.total_price}`,
+      "==============================",
+      "Thank you for your purchase ❤️",
+    ];
+
+    const content = lines.join("\n");
+
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
     const a = document.createElement("a");
     a.href = url;
-    a.download = `invoice-1.txt`;
+    a.download = `invoice-${order.id}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+
+    URL.revokeObjectURL(url);
   };
 
-  const handleBackToHome = () => {
-    router.push("/");
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg">Loading...</p>
+      </div>
+    );
+  }
 
-//   const orderId1 = `ORD-${Date.now().toString().slice(-8)}`;
-  const orderDate = new Date().toLocaleDateString();
+  if (error || !order) return null;
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50/50 via-white to-blue-50/50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        {/* Header Section */}
         <div className="text-center mb-12">
           <div className="relative inline-block mb-8">
             <div className="absolute inset-0 bg-green-200 rounded-full animate-ping opacity-75"></div>
@@ -163,18 +214,19 @@ Thank you for your purchase!
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
             Your order{" "}
-            <span className="font-semibold text-green-600">#{orderId}</span> has
-            been confirmed and is being processed.
+            <span className="font-semibold text-green-600">
+              #{order.order_code}
+            </span>{" "}
+            has been confirmed and is being processed.
           </p>
 
-          <Badge className="px-6 py-3 text-lg bg-green-100 text-green-800 border-2 border-green-200 hover:bg-green-200 transition-colors">
+          <Badge className="px-6 py-3 text-lg bg-green-100 text-green-800 border-2 border-green-200">
             <CheckCircle className="h-5 w-5 mr-2" />
             Payment Successful
           </Badge>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Order Card */}
           <Card className="lg:col-span-2 shadow-xl">
             <CardHeader className="border-b">
               <div className="flex items-center justify-between">
@@ -186,11 +238,10 @@ Thank you for your purchase!
                   Completed
                 </Badge>
               </div>
-              <CardDescription>Order placed on {orderDate}</CardDescription>
+              <CardDescription>Order placed on {new Date(order.created_at).toLocaleDateString()}</CardDescription>
             </CardHeader>
 
             <CardContent className="pt-6">
-              {/* Order Progress */}
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-700">
@@ -199,142 +250,76 @@ Thank you for your purchase!
                   <span className="text-sm text-gray-500">Step 3 of 3</span>
                 </div>
                 <Progress value={100} className="h-2" />
-                <div className="flex justify-between mt-2 text-xs text-gray-500">
-                  <span>Ordered</span>
-                  <span>Confirmed</span>
-                  <span className="text-green-600 font-medium">Completed</span>
-                </div>
               </div>
 
-              {/* Order Items */}
-              <div className="space-y-4 mb-8">
-                <h3 className="font-semibold text-lg">Order Details</h3>
-                <div className="space-y-3">
-                  {[
-                    {
-                      name: "Premium Widget",
-                      description: "Advanced widget with premium features",
-                      price: "$49.99",
-                    },
-                    {
-                      name: "Extended Warranty",
-                      description: "Additional 3-year coverage",
-                      price: "$9.99",
-                    },
-                    {
-                      name: "Express Shipping",
-                      description: "2-3 business days",
-                      price: "$5.99",
-                    },
-                  ].map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                    >
+              <div className="space-y-3 mb-8">
+                {order.items?.map((item: any) => (
+                  <div
+                    key={item.id || item.order_item_id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={`http://localhost:3000/api${item.product.images?.[0]}`}
+                        className="w-16 h-16 rounded-lg object-cover"
+                        alt={item.product.name}
+                      />
+
                       <div>
-                        <p className="font-medium">{item.name}</p>
+                        <p className="font-medium">{item.product.name}</p>
                         <p className="text-sm text-gray-500">
-                          {item.description}
+                          Quantity: {item.quantity}
                         </p>
                       </div>
-                      <p className="font-semibold">{item.price}</p>
                     </div>
-                  ))}
-                </div>
+                    <p className="font-semibold">${item.price}</p>
+                  </div>
+                ))}
               </div>
 
-              {/* Total Section */}
               <div className="bg-gradient-to-r from-gray-50 to-green-50 p-6 rounded-xl border">
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">$59.98</span>
+                    <span>Subtotal</span>
+                    <span>
+                      $
+                      {order.total_price -
+                        order.shipping_fee -
+                        order.vat_amount}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Shipping</span>
-                    <span className="font-medium">$5.99</span>
+                    <span>Shipping</span>
+                    <span>${order.shipping_fee}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span>Tax (VAT 8%)</span>
+                    <span>${order.vat_amount}</span>
+                  </div>
+
                   <Separator />
                   <div className="flex justify-between text-xl font-bold">
                     <span>Total</span>
-                    <span className="text-green-600">$65.97</span>
+                    <span className="text-green-600">${order.total_price}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Delivery Info */}
               <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-100">
                 <div className="flex items-start">
                   <Truck className="h-5 w-5 text-blue-600 mt-1 mr-3" />
-                  <div>
-                    <h4 className="font-semibold text-gray-800">
-                      Estimated Delivery
-                    </h4>
-                    <p className="text-gray-600 mt-1">
-                      Your order will arrive by{" "}
-                      {new Date(
-                        Date.now() + 5 * 24 * 60 * 60 * 1000
-                      ).toLocaleDateString()}
-                    </p>
-                  </div>
+                  <p>
+                    Estimated delivery:{" "}
+                    <strong>
+                      {new Date(order.delivery_date).toLocaleDateString()}
+                    </strong>
+                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Sidebar */}
           <div className="space-y-6">
-            {/* Next Steps */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">What&apos;s Next?</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                      <Mail className="h-4 w-4 text-blue-600" />
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Confirmation Email</h4>
-                    <p className="text-sm text-gray-600">
-                      Check your inbox for order details
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                      <Clock className="h-4 w-4 text-green-600" />
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Processing</h4>
-                    <p className="text-sm text-gray-600">
-                      Your items are being prepared
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
-                    <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
-                      <Phone className="h-4 w-4 text-purple-600" />
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">Support</h4>
-                    <p className="text-sm text-gray-600">
-                      Contact us if you need help
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Action Buttons */}
             <Card>
               <CardContent className="p-6 space-y-4">
                 <Button
@@ -355,7 +340,7 @@ Thank you for your purchase!
                 </Button>
 
                 <Button
-                  onClick={handleBackToHome}
+                  onClick={() => router.push("/")}
                   variant="ghost"
                   className="w-full h-12"
                 >
@@ -365,7 +350,6 @@ Thank you for your purchase!
               </CardContent>
             </Card>
 
-            {/* Continue Shopping */}
             <Card className="bg-gradient-to-br from-gray-50 to-gray-100">
               <CardContent className="p-6">
                 <h3 className="font-semibold text-gray-800 mb-4">
@@ -381,25 +365,6 @@ Thank you for your purchase!
                 </Button>
               </CardContent>
             </Card>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-12 pt-8 border-t text-center text-gray-600">
-          <p className="mb-2">Thank you for shopping with us! ❤️</p>
-          <p className="text-sm">
-            You will receive shipping updates via email.
-          </p>
-          <div className="mt-4 flex justify-center space-x-6 text-sm">
-            <button className="text-blue-600 hover:text-blue-800">
-              Track Order
-            </button>
-            <button className="text-blue-600 hover:text-blue-800">
-              Order History
-            </button>
-            <button className="text-blue-600 hover:text-blue-800">
-              Help Center
-            </button>
           </div>
         </div>
       </div>
