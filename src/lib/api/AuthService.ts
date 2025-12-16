@@ -35,6 +35,11 @@ const profile = async () => {
     return getApiInstance().get<User>("/user/profile");
 };
 
+const logout = async () => {
+    return getApiInstance().post("/auth/logout");
+};
+
+
 export default {
     login,
     register,
@@ -43,4 +48,5 @@ export default {
     forgotPassword,
     resetPassword,
     changePassword,
+    logout
 };

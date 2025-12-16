@@ -51,14 +51,13 @@ export class OrderManager extends PaginatedManager<Order, OrderQuery> {
         const x = await list(filter);
         return x.data;
     }
-
     async post(item: Order): Promise<void> {
         await post(item);
     }
     async put(item: Order): Promise<void> {
         await put(item);
     }
-    async delete(order_id: number | string): Promise<void> {
-        await deleteOne(order_id);
+    async delete(id: number | string): Promise<void> {
+        await deleteOne(id);
     }
 }

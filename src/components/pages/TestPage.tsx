@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -36,9 +37,19 @@ import { RadioGroup } from "@radix-ui/react-radio-group";
 import { RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../ui/pagination";
+import PaymentService from "@/lib/api/PaymentService";
+import { useEffect } from "react";
 
-export default function TestPage({}) {
+export default function TestPage({ }) {
   const cardBasises = "md:basis-1/2 lg:basis-1/3 xl:basis-1/4 2xl:basis-1/5";
+  useEffect(() => {
+    const fetchPayments = async () => {
+      const res = await PaymentService.list();
+      console.log(res.data);
+    };
+
+    fetchPayments();
+  }, []);
 
   return (
     <>
