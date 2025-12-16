@@ -21,6 +21,10 @@ export default function CartPage() {
     setSelectedItems(parsed.map((item: CartItemFlower) => item.id));
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(items));
+  }, [items])
+
   
   const subtotal = items
     .filter(item => selectedItems.includes(item.id))
@@ -82,22 +86,6 @@ export default function CartPage() {
   const handleQuickView = (product: RecommendedProduct) => {
     alert(`Xem nhanh: ${product.name}`);
   };
-
-  if (items.length === 0) {
-    return (
-      <div className="container max-w-6xl mx-auto px-4 py-8">
-        <CartHeader itemCount={0} onClearCart={handleClearCart} />
-        <EmptyCart />
-        <div className="mt-8">
-          <RecommendedProducts
-            products={recommendedProducts}
-            onAddToCart={handleAddRecommended}
-            onQuickView={handleQuickView}
-          />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="container max-w-6xl mx-auto px-4 py-8">

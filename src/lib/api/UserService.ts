@@ -8,14 +8,10 @@ const update = async (userId: number | string, fullName: string, email: string) 
 const profile = async()=>{
     return getApiInstance().get("/user/profile");
 }
-const logout = async()=>{
-    return getApiInstance().get("/user/logout");
-}
 
 export default {
     update,
     profile,
-    logout
 };
 
 export class UserManager extends Manager<User, null> {

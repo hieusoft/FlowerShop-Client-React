@@ -17,10 +17,11 @@ import {
 import { Input } from "@/components/ui/input"
 import { setAccessToken } from "@/lib/api"
 import AuthService from "@/lib/api/AuthService"
-import React from "react"
+import React, { useContext } from "react"
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircleIcon } from "lucide-react"
+import { GlobalContext, useUser } from "@/components/providers/contexts/global-context"
 
 
 
@@ -34,6 +35,8 @@ export default function LoginPage({
   const [error, setError] = React.useState("");
   const router = useRouter();
   const [checkingToken, setCheckingToken] = React.useState(true);
+
+  const global = useContext(GlobalContext);
 
 
   React.useEffect(() => {
@@ -59,7 +62,7 @@ export default function LoginPage({
       setAccessToken(data.data.accessToken);
 
       const profile = await AuthService.profile();
-      console.log("User Profile:", profile.data);
+      global.set.user(profile.data);
       console.log("Login successful");
       router.push("/");
     } catch (err: any) {

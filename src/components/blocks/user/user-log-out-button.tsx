@@ -1,6 +1,7 @@
 "use client";
 
 import { removeAccessToken } from "@/lib/api";
+import AuthService from "@/lib/api/AuthService";
 import UserService from "@/lib/api/UserService";
 import { Slot } from "@radix-ui/react-slot";
 import { ReactNode } from "react";
@@ -8,7 +9,7 @@ import { ReactNode } from "react";
 export function UserLogOutButton({children}: { children: ReactNode }) {
 
     function handleLogout() {
-        UserService.logout().then(() => {
+        AuthService.logout().then(() => {
             removeAccessToken();
             document.location.reload();
         })
