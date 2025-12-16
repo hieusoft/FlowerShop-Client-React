@@ -1,4 +1,3 @@
-
 export type Order = {
     order_id: number
     order_code: string
@@ -28,4 +27,8 @@ export type OrderItem = {
     updated_at: string,
 }
 
-export type OrderQuery = {}
+export type OrderQuery = {
+    user_id: number;
+    page?: number;
+    limit?: number;
+};
