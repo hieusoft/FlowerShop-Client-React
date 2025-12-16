@@ -117,7 +117,7 @@ export default function ShopPage() {
                 limit,
                 minPrice: priceRange[0],
                 maxPrice: priceRange[1],
-                subOccasionName: suboccasion,
+                subOccasionName: suboccasion as string,
                 sortOption: mapSortOption(sortBy),
             });
             setBouquets(res.data.data);
