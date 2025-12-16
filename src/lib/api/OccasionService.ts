@@ -3,7 +3,6 @@ import { getApiInstance } from "../api";
 import { Manager, PaginatedManager } from "../manager";
 import { PaginateResult } from "@/models/common";
 import { Occasion } from "@/models/occasion";
-import {  getApiInstance } from "../api";
 
 // TODO change param type
 const list = async () => {

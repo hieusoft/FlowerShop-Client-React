@@ -15,7 +15,6 @@ export default function PaymentFailPage() {
   const handleBackToCart = () => {
     router.push('/cart');
   };
-
   return (
     <div className="min-h-screen flex items-start justify-center bg-gray-50 p-4 pt-20">
 
