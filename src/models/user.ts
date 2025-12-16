@@ -14,6 +14,7 @@ export type UserMn = {
     userName: string,
     email: string,
     emailVerified:string,
+    isBanned: false,
     roles:[]
 }
 

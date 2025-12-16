@@ -6,6 +6,16 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { MultiSelect } from "@/components/ui/multi-select";
+
+export const Roles = [
+    { value: "User" },
+    { value: "Admin" },
+    { value: "Manager" },
+    { value: "Shipper" },
+]
 
 export const UserEditor: Editor<UserMn> = ({ manager, item, onClose }) => {
     const [isBusy, setIsBusy] = useState(false);
@@ -20,6 +30,7 @@ export const UserEditor: Editor<UserMn> = ({ manager, item, onClose }) => {
             userName: "",
             email: "",
             emailVerified: "",
+            isBanned: false,
             roles: [],
         }
     );
@@ -61,6 +72,26 @@ export const UserEditor: Editor<UserMn> = ({ manager, item, onClose }) => {
         >
             <FieldGroup>
                 <FieldSet>
+                    <div className="grid md:grid-cols-2 gap-5">
+                        <Field>
+                            <FieldLabel className="m-0">User name</FieldLabel>
+                            <Input
+                                name="userName"
+                                value={formState.userName}
+                                onChange={handleInputChange}
+                                disabled={isDisabled}
+                            />
+                        </Field>
+                        <Field>
+                            <FieldLabel className="m-0">Display name</FieldLabel>
+                            <Input
+                                name="fullName"
+                                value={formState.fullName}
+                                onChange={handleInputChange}
+                                disabled={isDisabled}
+                            />
+                        </Field>
+                    </div>
                     <Field>
                         <FieldLabel className="m-0">Email</FieldLabel>
                         <Input
@@ -71,24 +102,27 @@ export const UserEditor: Editor<UserMn> = ({ manager, item, onClose }) => {
                             disabled={isDisabled}
                         />
                     </Field>
-                    <Field>
-                        <FieldLabel className="m-0">Username</FieldLabel>
-                        <Input
-                            name="userName"
-                            value={formState.userName}
-                            onChange={handleInputChange}
-                            disabled={isDisabled}
-                        />
-                    </Field>
-                    <Field>
-                        <FieldLabel className="m-0">Full name</FieldLabel>
-                        <Input
-                            name="fullName"
-                            value={formState.fullName}
-                            onChange={handleInputChange}
-                            disabled={isDisabled}
-                        />
-                    </Field>
+                    <div className="grid md:grid-cols-2 gap-5">
+                        <Field>
+                            <FieldLabel className="m-0">Status</FieldLabel>
+                            <Field orientation="horizontal">
+                                <Checkbox
+                                    name="isBanned"
+                                    checked={formState.isBanned}
+                                    onCheckedChange={formState.set.isBanned}
+                                    disabled={isDisabled}
+                                    id="user-is-banned"
+                                />
+                                <Label htmlFor="user-is-banned">
+                                    Is banned
+                                </Label>
+                            </Field>
+                        </Field>
+                        <Field>
+                            <FieldLabel className="m-0">Roles</FieldLabel>
+                            <MultiSelect value={formState.roles} onValueChange={formState.set.roles} options={Roles} />
+                        </Field>
+                    </div>
                 </FieldSet>
             </FieldGroup>
         </EditorWrapper>
