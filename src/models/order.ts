@@ -27,3 +27,5 @@ export type OrderItem = {
     created_at: string,
     updated_at: string,
 }
+
+export type OrderQuery = {}
