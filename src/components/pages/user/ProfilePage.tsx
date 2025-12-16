@@ -1,6 +1,7 @@
 "use client"
 import { UserDeliverySettings } from "@/components/blocks/user/user-delivery-settings";
 import { UserInfoSettings } from "@/components/blocks/user/user-info-settings";
+import UserOrderHistory from "@/components/blocks/user/user-order-history";
 import { useUser } from "@/components/providers/contexts/global-context"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TabsContent } from "@radix-ui/react-tabs";
@@ -32,6 +33,9 @@ export default function ProfilePage() {
       </TabsContent>
       <TabsContent className="flex-1" value="delivery">
         <UserDeliverySettings />
+      </TabsContent>
+      <TabsContent className="flex-1" value="orders">
+        <UserOrderHistory />
       </TabsContent>
     </Tabs>
   </div>

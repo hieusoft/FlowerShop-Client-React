@@ -29,7 +29,7 @@ export function UserDeliverySettings() {
     function handleDataLoad() {
         setIsInit(true);
         setIsBusy(true);
-        RecipientService.fromSelf().then(({data}) => {
+        RecipientService.fromUser().then(({data}) => {
             setRecipients(data);
             if (recipientIndex < 0) for (let i = 0; i < data.length; i++) if (data[i].isDefault) {
                 setRecipientIndex(i);

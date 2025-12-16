@@ -190,7 +190,7 @@ export default function CheckoutPage() {
       }
 
       
-      const order = await OrderService.createOrder(finalData);
+      const order = await OrderService.post(finalData);
 
       if (!order || !order.data.order_id) {
         throw new Error("Order creation failed or order ID not returned.");
