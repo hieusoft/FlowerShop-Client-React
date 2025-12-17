@@ -24,6 +24,7 @@ export default function UserOrderHistory() {
   }, [user.user, currentPage, limit]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOrders([]);
     handleDataLoad();
   }, [handleDataLoad]);
