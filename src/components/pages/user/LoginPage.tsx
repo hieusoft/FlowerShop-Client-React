@@ -18,10 +18,12 @@ import { Input } from "@/components/ui/input"
 import { setAccessToken } from "@/lib/api"
 import AuthService from "@/lib/api/AuthService"
 import React, { useContext } from "react"
-import { useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircleIcon } from "lucide-react"
+import { AlertCircleIcon, Eye, EyeOff } from "lucide-react"
 import { GlobalContext, useUser } from "@/components/providers/contexts/global-context"
+import { AxiosError } from "axios"
+import { toast } from "sonner"
 
 
 
@@ -29,12 +31,15 @@ export default function LoginPage({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-
+  const searchParams = useSearchParams();
+  let rawVerify = searchParams.get("verified");
+  let rawReset = searchParams.get("reset");
   const [emailOrUsername, setEmailOrUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState("");
   const router = useRouter();
   const [checkingToken, setCheckingToken] = React.useState(true);
+  const [showPassword, setShowPassword] = React.useState(false);
 
   const global = useContext(GlobalContext);
 
@@ -47,6 +52,16 @@ export default function LoginPage({
       setCheckingToken(false);
     }
   }, [router]);
+
+
+
+  React.useEffect(() => {
+    if (!checkingToken && rawVerify === "true") {
+      toast.success("Email verified successfully. You can now login.");
+    } else if (!checkingToken && rawReset === "success") {
+      toast.success("Reset password successfully.");
+    }
+  }, [rawVerify, rawReset, checkingToken]);
 
   if (checkingToken) {
     return null;
@@ -66,13 +81,17 @@ export default function LoginPage({
       console.log("Login successful");
       router.push("/");
     } catch (err: any) {
-      if (err?.response?.data?.message === "Email not verified") {
-        router.push(`/verify-email?user=${encodeURIComponent(emailOrUsername)}`);
-        return;
+
+      if (err instanceof AxiosError) {
+        if (err?.response?.data?.message === "Email not verified") {
+          router.push(`/verify-email?user=${encodeURIComponent(emailOrUsername)}`);
+          return;
+        }
+      setError(err?.response?.data?.message)
       }
-      setError("Login failed. Please check your credentials and try again.");
     }
   };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -108,20 +127,33 @@ export default function LoginPage({
                     Forgot your password?
                   </a>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="password"
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                  </button>
+                </div>
               </Field>
 
               {error && (
                 <Alert variant="destructive" className="mt-2">
                   <AlertCircleIcon />
-                    <AlertDescription>{error}</AlertDescription>
+                  <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
 
@@ -138,6 +170,7 @@ export default function LoginPage({
           </form>
         </CardContent>
       </Card>
+
     </div>
   )
 }

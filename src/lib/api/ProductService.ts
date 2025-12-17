@@ -3,7 +3,6 @@ import { getApiInstance } from "../api";
 import { Manager, PaginatedManager } from "../manager";
 import { PaginateResult } from "@/models/common";
 
-// TODO change param type
 const list = async (params: BouquetQuery) => {
     return getApiInstance().get("/bouquets", { params });
 };

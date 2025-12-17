@@ -39,12 +39,13 @@ import { Label } from "@/components/ui/label";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../ui/pagination";
 import PaymentService from "@/lib/api/PaymentService";
 import { useEffect } from "react";
+import GreetingService from "@/lib/api/GreetingService";
 
 export default function TestPage({ }) {
   const cardBasises = "md:basis-1/2 lg:basis-1/3 xl:basis-1/4 2xl:basis-1/5";
   useEffect(() => {
     const fetchPayments = async () => {
-      const res = await PaymentService.list();
+      const res = await GreetingService.list();
       console.log(res.data);
     };
 

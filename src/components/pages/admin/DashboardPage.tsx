@@ -1,8 +1,10 @@
 "use client";
 
+import { SectionCards } from "@/components/blocks/dashboard/section-card";
 import { DashboardLayout } from "@/components/layouts/dashboard";
 import { Card, CardThumbnail, CardHeader, CardDescription } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { cn, FormattableUnit, formatUnit, formatWhole } from "@/lib/utils";
 import { AreaChart, Area, LineChart, Line, YAxis, BarChart, Bar, XAxis } from "recharts";
 import { ClassNameValue } from "tailwind-merge";
@@ -17,10 +19,10 @@ function randomData() {
     });
 }
 
-const smallCardBasises = 
+const smallCardBasises =
     "basis-1/1 @md/carousel:basis-1/2 @xl/carousel:basis-1/3 @3xl/carousel:basis-1/4 @5xl/carousel:basis-1/5 @7xl/carousel:basis-1/6"
 
-const largeCardBasises = 
+const largeCardBasises =
     "basis-1/1 @xl/carousel:basis-1/2 @3xl/carousel:basis-1/3 @6xl/carousel:basis-1/4"
 
 
@@ -129,7 +131,7 @@ const trendsData = [
 export default function DashboardPage() {
     return (
         <DashboardLayout breadcrumb={["Admin", "Overview"]}>
-            <h2 className="font-heading text-3xl">Notifications</h2>
+            {/* <h2 className="font-heading text-3xl">Notifications</h2>
             <Card className="my-4 py-4 -mx-4 border-x-0 rounded-none">
                 <CardDescription className="text-center">
                     No recent notifications.
@@ -291,13 +293,25 @@ export default function DashboardPage() {
                 </CarouselContent>
                 <CarouselPrevious />
                 <CarouselNext />
-            </Carousel>
+            </Carousel> */}
+            <SidebarProvider
+            >
+                <SidebarInset>
+                    <div className="flex flex-1 flex-col">
+                        <div className="@container/main flex flex-1 flex-col gap-2">
+                            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+                                <SectionCards />
+                            </div>
+                        </div>
+                    </div>
+                </SidebarInset>
+            </SidebarProvider>
         </DashboardLayout>
     )
 }
 
 function SimpleChart(
-    { data, dataKey, color, className } : {
+    { data, dataKey, color, className }: {
         data: object[],
         dataKey: string,
         color: number
@@ -320,8 +334,8 @@ function SimpleChart(
                 </linearGradient>
             </defs>
             <YAxis width={0} visibility="hidden" domain={([min, max]) => [min - (max - min) * 0.1, max]} />
-            <Area 
-                type="monotone" dataKey={dataKey} dot={false} activeDot={false} 
+            <Area
+                type="monotone" dataKey={dataKey} dot={false} activeDot={false}
                 isAnimationActive={false}
                 stroke={`var(--chart-${color})`} strokeWidth={1.2}
                 fill={`url(#chart-fill-${key})`}
