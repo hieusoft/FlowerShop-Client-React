@@ -62,9 +62,19 @@ clientApiInstance.interceptors.request.use(
 clientApiInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      const originalRequest = error.config as AxiosRequestConfigWithRetry;
+    const originalRequest = error.config as AxiosRequestConfigWithRetry;
 
+    
+    if (
+      originalRequest?.url?.includes("/api/auth/login") ||
+      originalRequest?.url?.includes("/api/auth/register") ||
+      originalRequest?.url?.includes("/api/auth/verify") ||
+      originalRequest?.url?.includes("/api/auth/refresh")
+    ) {
+      return Promise.reject(error);
+    }
+
+    if (error.response?.status === 401) {
       if (!originalRequest || originalRequest._retry) {
         return Promise.reject(error);
       }
@@ -73,21 +83,17 @@ clientApiInstance.interceptors.response.use(
 
       try {
         const refreshResponse = await axios.post(
-          `/api/auth/refresh`,
+          "/api/auth/refresh",
           {},
           { withCredentials: true }
         );
-
-        if (refreshResponse.status === 401) {
-          removeAccessToken();
-          return Promise.reject(error);
-        }
 
         const newAccessToken = refreshResponse.data.newAccessToken;
         setAccessToken(newAccessToken);
 
         originalRequest.headers = originalRequest.headers || {};
-        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+        originalRequest.headers["Authorization"] =
+          `Bearer ${newAccessToken}`;
 
         return clientApiInstance(originalRequest);
       } catch (e) {

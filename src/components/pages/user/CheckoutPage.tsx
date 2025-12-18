@@ -199,7 +199,7 @@ export default function CheckoutPage() {
       localStorage.removeItem("checkoutData");
       window.dispatchEvent(new Event("cartUpdated"));
       await delay(3000);
-      const paymentResponse = await PaymentService.getPaymentByOrderId(order.data.order_id);
+      const paymentResponse = await PaymentService.getByOrderId(order.data.order_id);
       console.log(paymentResponse);
       
       const paymentUrl = paymentResponse?.data?.paymentUrl;
