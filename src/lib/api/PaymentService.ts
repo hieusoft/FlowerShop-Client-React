@@ -1,4 +1,4 @@
-// lib/api/PaymentService.ts
+
 import { PaginateResult } from "@/models/common";
 import { getApiInstance } from "../api";
 import { Payment, PaymentQuery } from "@/models/payment";

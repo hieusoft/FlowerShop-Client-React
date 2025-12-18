@@ -6,16 +6,17 @@ import { Card, CardThumbnail, CardHeader, CardDescription } from "@/components/u
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { cn, FormattableUnit, formatUnit, formatWhole } from "@/lib/utils";
+import { useEffect, useState } from "react";
 import { AreaChart, Area, LineChart, Line, YAxis, BarChart, Bar, XAxis } from "recharts";
 import { ClassNameValue } from "tailwind-merge";
 
 function randomData() {
     let value: number = Math.random() * 5 + 2.5;
     let velocity: number = Math.random();
-    return new Array(30).fill("").map(x => {
+    return new Array(30).fill("").map((x, i) => {
         value += velocity;
         velocity = 1 + velocity / 2 - value / 5 + (Math.random() - 0.5) + 10 * (Math.random() - 0.5) ** 4;
-        return { value }
+        return { x: i, y: value }
     });
 }
 
@@ -24,20 +25,6 @@ const smallCardBasises =
 
 const largeCardBasises =
     "basis-1/1 @xl/carousel:basis-1/2 @3xl/carousel:basis-1/3 @6xl/carousel:basis-1/4"
-
-
-
-
-
-
-const performanceData = [
-    {
-        type: "revenue",
-        name: "Revenue",
-        count: 25829000,
-        unit: "currency/vnd"
-    },
-];
 
 const conversionData = [
     {
@@ -125,10 +112,75 @@ const trendsData = [
     },
 ]
 
+type OrderInfo = Array<{
+    time_bucket: string,
+    count: number,
+    revenue: number
+}>
 
+type UserInfo = {
+    totalItems: number
+}
+
+type ProductInfo = {
+    totalItems: number
+}
 
 
 export default function DashboardPage() {
+    const [orderInfo, setOrderInfo] = useState<OrderInfo | null>(null);
+    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const [productInfo, setProductInfo] = useState<ProductInfo | null>(null);
+
+    useEffect(() => {
+        OrderService.queryAnalytics(7).then(({data}) => {
+            setOrderInfo(data);
+        })
+        UserService.list({ limit: 10 }).then(({data}) => {
+            setUserInfo(data);
+        })
+        ProductService.list({ limit: 10 }).then(({data}) => {
+            setProductInfo(data);
+        })
+    }, [])
+
+    const performanceData = [
+        ...(orderInfo ? [
+            {
+                type: "revenue",
+                name: "Revenue",
+                count: orderInfo.reduce((x, y) => x + y.revenue, 0),
+                unit: "currency/vnd",
+                graph: orderInfo.map(({time_bucket, revenue}) => ({ x: new Date(time_bucket), y: revenue }))
+            },
+            {
+                type: "orders",
+                name: "Orders",
+                count: orderInfo.reduce((x, y) => x + y.count, 0),
+                unit: "unit",
+                graph: orderInfo.map(({time_bucket, count}) => ({ x: new Date(time_bucket), y: count }))
+            },
+        ] : []),
+        ...(userInfo ? [
+            {
+                type: "users",
+                name: "Users",
+                count: userInfo.totalItems,
+                unit: "unit",
+                graph: randomData(),
+            },
+        ] : []),
+        ...(productInfo ? [
+            {
+                type: "items",
+                name: "Items",
+                count: productInfo.totalItems,
+                unit: "unit",
+                graph: randomData(),
+            },
+        ] : []),
+    ];
+
     return (
         <DashboardLayout breadcrumb={["Admin", "Overview"]}>
             {/* <h2 className="font-heading text-3xl">Notifications</h2>
@@ -145,7 +197,7 @@ export default function DashboardPage() {
                         <div className="h-full">
                         <Card className="h-full border-0 border-x -ml-px rounded-none">
                             <CardThumbnail className="border-b-0 h-30 p-4 -mb-6 aspect-auto">
-                                <SimpleChart data={randomData()} dataKey="value" color={index} />
+                                <SimpleChart data={item.graph} color={index} />
                             </CardThumbnail>
                             <CardHeader className="text-sm">
                                 <h3>

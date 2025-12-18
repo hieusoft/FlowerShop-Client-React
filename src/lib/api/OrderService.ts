@@ -32,6 +32,10 @@ const deleteOne = async (order_id: number | string) => {
   return getApiInstance().delete(`/orders/${order_id}`);
 };
 
+const queryAnalytics = async (date_range: number = 7) => {
+  return getApiInstance().get(`/orders/analytics`, { params: { date_range } });
+};
+
 export default {
   list,
   getById,
@@ -40,6 +44,7 @@ export default {
   post,
   put,
   delete: deleteOne,
+  queryAnalytics
 };
 
 export class OrderManager extends PaginatedManager<Order, OrderQuery> {

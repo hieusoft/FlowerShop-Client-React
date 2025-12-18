@@ -1,4 +1,3 @@
-
 export type Order = {
     order_id: number
     order_code: string
