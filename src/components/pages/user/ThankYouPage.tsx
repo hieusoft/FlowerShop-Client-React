@@ -56,7 +56,7 @@ export default function ThankYouPage() {
         setLoading(true);
         setError(false);
 
-        const res = await OrderService.fromId(orderId);
+        const res = await OrderService.getById(orderId);
         const orderData = res.data;
 
         const itemsWithProduct = await Promise.all(

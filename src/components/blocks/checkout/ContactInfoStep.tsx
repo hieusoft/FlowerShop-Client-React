@@ -1,12 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { User, ChevronDown, X } from "lucide-react";
 import RecipientService from "@/lib/api/RecipientService";
-import { useState, useEffect } from "react";
 
 interface Recipient {
   recipientId: number;
@@ -20,52 +20,48 @@ interface Recipient {
 }
 
 interface ContactInfoStepProps {
-  formData: { phone: string; fullName: string };
+  formData: {
+    phone: string;
+    fullName: string;
+  };
   onInputChange: (field: string, value: string | boolean | number) => void;
-
 }
 
 export default function ContactInfoStep({ formData, onInputChange }: ContactInfoStepProps) {
   const [open, setOpen] = useState(false);
-
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [selectedRecipientId, setSelectedRecipientId] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [useManualInput, setUseManualInput] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Fetch recipients
   useEffect(() => {
-    const fetchRecipients = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        setIsLoading(true);
-        const response = await RecipientService.fromUser();
-        const data = response.data || [];
-        
+        const res = await RecipientService.fromUser();
+        const data: Recipient[] = res.data || [];
         setRecipients(data);
 
-        const defaultRecipient = data.find((r: Recipient) => r.isDefault);
-        const firstRecipient = data[0];
-
-        const selected = defaultRecipient || firstRecipient;
-
-        if (selected) {
-          setSelectedRecipientId(selected.recipientId);
-          fillFormWithRecipient(selected);
+        if (data.length === 0) {
+          setUseManualInput(true);
+          onInputChange("isNew", true);
+          return;
         }
-      } catch (error) {
-        console.error("Failed to fetch recipients:", error);
+
+        const selected = data.find(r => r.isDefault) || data[0];
+        selectRecipient(selected);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
-    fetchRecipients();
+    fetchData();
   }, []);
 
-  // Helper to fill form
-  const fillFormWithRecipient = (recipient: Recipient) => {
+  const selectRecipient = (recipient: Recipient) => {
+    setUseManualInput(false);
+    setSelectedRecipientId(recipient.recipientId);
     onInputChange("fullName", recipient.fullName);
-   
     onInputChange("phone", recipient.phoneNumber);
     onInputChange("address", recipient.addressLine);
     onInputChange("province", recipient.province);
@@ -73,32 +69,24 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
     onInputChange("isNew", false);
   };
 
-  const clearToManualInput = () => {
+  const switchToManual = () => {
     setUseManualInput(true);
     setSelectedRecipientId(null);
     onInputChange("fullName", "");
-  
-
     onInputChange("phone", "");
-    onInputChange("address","");
+    onInputChange("address", "");
     onInputChange("province", "");
-    onInputChange("ward","");
+    onInputChange("ward", "");
     onInputChange("isNew", true);
   };
 
-  const handleRecipientSelect = (recipient: Recipient) => {
-    setUseManualInput(false);
-    setSelectedRecipientId(recipient.recipientId);
-    fillFormWithRecipient(recipient);
-  };
-
-  const selectedRecipient = recipients.find((r) => r.recipientId === selectedRecipientId);
+  const selectedRecipient = recipients.find(r => r.recipientId === selectedRecipientId);
 
   const triggerText = useManualInput
     ? "Enter manually"
     : selectedRecipient
-      ? selectedRecipient.fullName
-      : "Select recipient";
+    ? selectedRecipient.fullName
+    : "Select recipient";
 
   return (
     <Card>
@@ -113,18 +101,15 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
       </CardHeader>
 
       <CardContent className="space-y-6 overflow-visible">
-
-        {/* Recipient Dropdown */}
-        {!isLoading && recipients.length > 0 && (
+        {!loading && recipients.length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>Select Recipient</Label>
-
-              {selectedRecipientId && !useManualInput && (
+              {!useManualInput && selectedRecipientId && (
                 <button
                   type="button"
-                  onClick={clearToManualInput}
-                  className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                  onClick={switchToManual}
+                  className="text-sm text-blue-600 flex items-center gap-1"
                 >
                   <X className="h-3 w-3" />
                   Enter manually
@@ -132,113 +117,71 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
               )}
             </div>
 
-        <Popover open={open} onOpenChange={setOpen}>
-  <PopoverTrigger asChild>
-    <button
-      type="button"
-      onClick={() => setOpen(!open)}
-      className="flex items-center justify-between w-full p-3 border rounded-md bg-white hover:bg-gray-50 transition-colors"
-    >
-      <div className="flex items-center gap-2">
-        <User className="h-4 w-4" />
-        <span className="font-medium">{triggerText}</span>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between p-3 border rounded-md"
+                >
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="font-medium">{triggerText}</span>
+                  </div>
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </PopoverTrigger>
 
-        {!useManualInput && selectedRecipient?.isDefault && (
-          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-            Default
-          </span>
-        )}
+              <PopoverContent
+                align="start"
+                sideOffset={4}
+                className="w-[var(--radix-popper-anchor-width)] p-0"
+              >
+                <div className="max-h-60 overflow-auto">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      switchToManual();
+                      setOpen(false);
+                    }}
+                    className="w-full p-3 text-left hover:bg-gray-50"
+                  >
+                    <div className="font-medium">Enter manually</div>
+                    <div className="text-sm text-gray-500">Create new recipient</div>
+                  </button>
 
-        {useManualInput && (
-          <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-            Manual Input
-          </span>
-        )}
-      </div>
-      <ChevronDown className="h-4 w-4" />
-    </button>
-  </PopoverTrigger>
+                  <div className="border-t my-1" />
 
-  {/* FULL WIDTH FIX */}
-  <PopoverContent
-    align="start"
-    sideOffset={4}
-    className="w-[var(--radix-popper-anchor-width)] p-0"
-  >
-    <div className="max-h-60 overflow-auto">
-
-      {/* Manual Mode Option */}
-      <button
-        type="button"
-        onClick={() => {
-          clearToManualInput();
-          setOpen(false);        // 🔥 Auto close
-        }}
-        className={`flex items-center justify-between w-full p-3 text-left hover:bg-gray-50 ${
-          useManualInput ? "bg-blue-50" : ""
-        }`}
-      >
-        <div>
-          <div className="font-medium">Enter Manually</div>
-          <div className="text-sm text-gray-500">Create a new recipient</div>
-        </div>
-
-        {useManualInput && (
-          <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-            Selected
-          </span>
-        )}
-      </button>
-
-      <div className="border-t my-1"></div>
-
-      {/* Recipient List */}
-      {recipients.map((recipient) => (
-        <button
-          key={recipient.recipientId}
-          onClick={() => {
-            handleRecipientSelect(recipient);
-            setOpen(false);       // 🔥 Auto close
-          }}
-          type="button"
-          className={`flex items-center justify-between w-full p-3 text-left hover:bg-gray-50 ${
-            selectedRecipientId === recipient.recipientId ? "bg-blue-50" : ""
-          }`}
-        >
-          <div>
-            <div className="font-medium">{recipient.fullName}</div>
-            <div className="text-sm text-gray-500">{recipient.phoneNumber}</div>
-            {recipient.addressLine && (
-              <div className="text-xs text-gray-400">{recipient.addressLine}</div>
-            )}
-          </div>
-
-          {recipient.isDefault && (
-            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-              Default
-            </span>
-          )}
-        </button>
-      ))}
-    </div>
-  </PopoverContent>
-</Popover>
-
+                  {recipients.map(r => (
+                    <button
+                      key={r.recipientId}
+                      type="button"
+                      onClick={() => {
+                        selectRecipient(r);
+                        setOpen(false);
+                      }}
+                      className={`w-full p-3 text-left hover:bg-gray-50 ${
+                        selectedRecipientId === r.recipientId ? "bg-blue-50" : ""
+                      }`}
+                    >
+                      <div className="font-medium">{r.fullName}</div>
+                      <div className="text-sm text-gray-500">{r.phoneNumber}</div>
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         )}
 
-        {/* Contact Form */}
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number *</Label>
             <Input
               id="phone"
-              type="tel"
-              placeholder="0912 345 678"
               value={formData.phone}
-              onChange={(e) => onInputChange("phone", e.target.value)}
+              onChange={e => onInputChange("phone", e.target.value)}
+              disabled={!!selectedRecipientId && !useManualInput}
               required
-              disabled={selectedRecipientId && !useManualInput}
             />
           </div>
 
@@ -246,37 +189,25 @@ export default function ContactInfoStep({ formData, onInputChange }: ContactInfo
             <Label htmlFor="fullName">Full Name *</Label>
             <Input
               id="fullName"
-              placeholder="John Doe"
               value={formData.fullName}
-              onChange={(e) => onInputChange("fullName", e.target.value)}
+              onChange={e => onInputChange("fullName", e.target.value)}
+              disabled={!!selectedRecipientId && !useManualInput}
               required
-              disabled={selectedRecipientId && !useManualInput}
             />
           </div>
         </div>
 
-        {/* Loading */}
-        {isLoading && (
-          <div className="text-center py-4 text-gray-500">Loading recipients...</div>
+        {loading && (
+          <div className="text-center text-gray-500">Loading recipients...</div>
         )}
 
-        {/* Empty List */}
-        {!isLoading && recipients.length === 0 && (
-          <div className="text-center py-4 text-gray-500 border rounded-md bg-gray-50">
-            You have no saved recipients. Please enter manually.
-          </div>
-        )}
-
-        {/* Manual Mode Info */}
-        {useManualInput && (
-          <div className="p-3 border border-blue-200 bg-blue-50 rounded-md">
-            <p className="text-sm text-blue-800">
-              <strong>Manual Input Mode:</strong> You are entering a new recipient.
-              This information will NOT be saved to your list.
-            </p>
+        {!loading && recipients.length === 0 && (
+          <div className="text-center text-gray-500 border rounded-md p-4">
+            No saved recipients. Please enter manually.
           </div>
         )}
       </CardContent>
     </Card>
   );
 }
+

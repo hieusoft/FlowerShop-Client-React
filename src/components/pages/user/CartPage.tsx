@@ -1,31 +1,33 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import CartHeader from "@/components/blocks/cart/CartHeader";
 import CartItemsList from "@/components/blocks/cart/CartItemsList";
 import CartSummary from "@/components/blocks/cart/CartSummary";
-import EmptyCart from "@/components/blocks/cart/EmptyCart";
-import RecommendedProducts from "@/components/blocks/cart/RecommendedProducts";
-
 import { CartItemFlower, RecommendedProduct } from "../../../models/cart";
 
 export default function CartPage() {
   const [items, setItems] = useState<CartItemFlower[]>([]);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [savedItems, setSavedItems] = useState<CartItemFlower[]>([]);
+  const hasLoaded = useRef(false);
 
   useEffect(() => {
+    if (hasLoaded.current) return;
+
     const data = localStorage.getItem("cart");
-    const parsed = data ? JSON.parse(data) : [];
+    const parsed: CartItemFlower[] = data ? JSON.parse(data) : [];
+
     setItems(parsed);
-    setSelectedItems(parsed.map((item: CartItemFlower) => item.id));
+    setSelectedItems(parsed.map(item => item.id));
+
+    hasLoaded.current = true;
   }, []);
 
   useEffect(() => {
+    if (!hasLoaded.current) return;
     localStorage.setItem("cart", JSON.stringify(items));
-  }, [items])
+  }, [items]);
 
-  
   const subtotal = items
     .filter(item => selectedItems.includes(item.id))
     .reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -63,11 +65,9 @@ export default function CartPage() {
 
   const handleSaveForLater = (id: string) => {
     const item = items.find(i => i.id === id);
-    if (item) {
-      setSavedItems(prev => [...prev, item]);
-      handleRemoveItem(id);
-      alert("Đã lưu sản phẩm để mua sau!");
-    }
+    if (!item) return;
+    setItems(prev => prev.filter(i => i.id !== id));
+    setSelectedItems(prev => prev.filter(i => i !== id));
   };
 
   const handleAddRecommended = (product: RecommendedProduct) => {
@@ -80,11 +80,6 @@ export default function CartPage() {
     };
     setItems(prev => [...prev, newItem]);
     setSelectedItems(prev => [...prev, newItem.id]);
-    alert("Đã thêm sản phẩm vào giỏ hàng!");
-  };
-
-  const handleQuickView = (product: RecommendedProduct) => {
-    alert(`Xem nhanh: ${product.name}`);
   };
 
   return (
@@ -110,12 +105,12 @@ export default function CartPage() {
             subtotal={subtotal}
             selectedCount={selectedItems.length}
             totalItems={items.length}
-            cartItems={items.filter(item => selectedItems.includes(item.id))}
+            cartItems={items.filter(item =>
+              selectedItems.includes(item.id)
+            )}
           />
         </div>
       </div>
-
-      
     </div>
   );
 }
