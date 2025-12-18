@@ -66,10 +66,10 @@ clientApiInstance.interceptors.response.use(
 
     
     if (
-      originalRequest?.url?.includes("/api/auth/login") ||
-      originalRequest?.url?.includes("/api/auth/register") ||
-      originalRequest?.url?.includes("/api/auth/verify") ||
-      originalRequest?.url?.includes("/api/auth/refresh")
+      originalRequest?.url?.includes("/auth/login") ||
+      originalRequest?.url?.includes("/auth/register") ||
+      originalRequest?.url?.includes("/auth/verify") ||
+      originalRequest?.url?.includes("/auth/refresh")
     ) {
       return Promise.reject(error);
     }

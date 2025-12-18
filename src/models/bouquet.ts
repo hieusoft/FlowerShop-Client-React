@@ -18,6 +18,7 @@ export type BouquetQuery = {
     search_query?: string,
     name?: string,
     subOccasionId?: string,
+    subOccasionName?: string,
     minPrice?: number,
     maxPrice?: number,
     startDate?: Date,
@@ -25,5 +26,6 @@ export type BouquetQuery = {
     page?: number,
     limit: number,
     sortBy?: string,
+    sortOption?: string,
     order?: "asc" | "desc"
 }
