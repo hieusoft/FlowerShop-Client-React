@@ -31,13 +31,15 @@ import {
   HeaderSearchContent,
   HeaderSearchTrigger,
 } from "./header-search";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "next-themes";
 import { MonitorIcon, BellIcon } from "lucide-react";
 import { HeaderUser } from "./header-user";
 import { CartItem } from "@/models/cart";
 import { useParams, usePathname } from "next/navigation";
+import { GlobalContext } from "@/components/providers/contexts/global-context";
+import NotificationService from "@/lib/api/NotificationService";
 
 export function HeaderClient({ occasions }: { occasions: React.ReactNode }) {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -47,12 +49,25 @@ export function HeaderClient({ occasions }: { occasions: React.ReactNode }) {
 
   const pathname = usePathname();
   const params = useParams();
+  const global = useContext(GlobalContext);
+  const currentUser = global?.user?.userId
 
   const isMobile = useIsMobile();
   const [isMobileExpanded, setIsMobileExpanded] = useState(false);
 
   const { theme, setTheme } = useTheme();
   const orientation = isMobile ? "vertical" : "horizontal";
+
+  const fetchNotifications = async () => {
+    if (!currentUser) return;
+
+    try {
+      const res = await NotificationService.getNotiByUser(currentUser);
+      setNotifyQty(res.data?.length || 0);
+    } catch (err) {
+      console.error("Failed to fetch notifications:", err);
+    }
+  };
 
   function handleNavValueChange(target: string) {
     if (isMobile && isMobileExpanded) {
@@ -71,19 +86,23 @@ export function HeaderClient({ occasions }: { occasions: React.ReactNode }) {
     setIsScrolled(scrollY > 0);
   }
 
-  // Scroll listener
+
   useEffect(() => {
     window.addEventListener("scroll", handleDocumentScroll);
     return () => window.removeEventListener("scroll", handleDocumentScroll);
   }, []);
 
-  // Reset mobile menu if screen changes
+  useEffect(() => {
+   
+      fetchNotifications();
+  
+  }, [currentUser]);
+
   useEffect(() => {
     if (!isMobile && isMobileExpanded) {
       setIsMobileExpanded(false);
     }
     setNavValue("");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile]);
 
   useEffect(() => {
@@ -144,11 +163,11 @@ export function HeaderClient({ occasions }: { occasions: React.ReactNode }) {
                 "max-w-none",
                 isMobile
                   ? cn(
-                      "fixed h-auto *:first:h-full right-0 top-0 bottom-0 justify-end",
-                      isMobileExpanded
-                        ? ""
-                        : "pointer-events-none translate-x-full"
-                    )
+                    "fixed h-auto *:first:h-full right-0 top-0 bottom-0 justify-end",
+                    isMobileExpanded
+                      ? ""
+                      : "pointer-events-none translate-x-full"
+                  )
                   : "flex-1 ml-8 *:first:w-full transition-[margin,padding]"
               )}
               orientation={orientation}
@@ -188,7 +207,7 @@ export function HeaderClient({ occasions }: { occasions: React.ReactNode }) {
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>{occasions}</NavigationMenuContent>
                 </NavigationMenuItem>
-                
+
                 <span className="grow"></span>
                 <HeaderSearchTrigger>
                   <Button
@@ -237,9 +256,8 @@ export function HeaderClient({ occasions }: { occasions: React.ReactNode }) {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
                 <NavigationMenuItem className="relative">
-                  {/* ICON + LINK */}
                   <Link
-                    href="/notifications"
+                    href="/profile?tab=notifications"
                     className="relative rounded-full size-10 p-0 flex items-center justify-center hover:bg-accent"
                   >
                     <BellIcon className="size-5" />
@@ -322,8 +340,8 @@ export function HeaderClient({ occasions }: { occasions: React.ReactNode }) {
                   isMobile
                     ? ""
                     : isScrolled
-                    ? "*:pb-8"
-                    : "border-t *:pt-4 -mt-2"
+                      ? "*:pb-8"
+                      : "border-t *:pt-4 -mt-2"
                 )}
               />
             </NavigationMenu>

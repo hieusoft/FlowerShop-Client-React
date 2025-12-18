@@ -22,6 +22,7 @@ export type OrderItem = {
     order_item_id: number,
     order_id: number,
     bouquet_id: string,
+    bouquet_name: string;
     quantity: number,
     price: number,
     created_at: string,
