@@ -1,10 +1,11 @@
 "use client";
 
-import { SectionCards } from "@/components/blocks/dashboard/section-card";
 import { DashboardLayout } from "@/components/layouts/dashboard";
 import { Card, CardThumbnail, CardHeader, CardDescription } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import OrderService, { OrderManager } from "@/lib/api/OrderService";
+import ProductService from "@/lib/api/ProductService";
+import UserService from "@/lib/api/UserService";
 import { cn, FormattableUnit, formatUnit, formatWhole } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { AreaChart, Area, LineChart, Line, YAxis, BarChart, Bar, XAxis } from "recharts";
@@ -20,10 +21,10 @@ function randomData() {
     });
 }
 
-const smallCardBasises =
+const smallCardBasises = 
     "basis-1/1 @md/carousel:basis-1/2 @xl/carousel:basis-1/3 @3xl/carousel:basis-1/4 @5xl/carousel:basis-1/5 @7xl/carousel:basis-1/6"
 
-const largeCardBasises =
+const largeCardBasises = 
     "basis-1/1 @xl/carousel:basis-1/2 @3xl/carousel:basis-1/3 @6xl/carousel:basis-1/4"
 
 const conversionData = [
@@ -351,8 +352,8 @@ export default function DashboardPage() {
 }
 
 function SimpleChart(
-    { data, dataKey, color, className }: {
-        data: object[],
+    { data, dataKey, color, className } : {
+        data: {x: number, y: number}[],
         dataKey: string,
         color: number
         className?: ClassNameValue
@@ -373,9 +374,10 @@ function SimpleChart(
                     <stop offset="95%" stopColor={`var(--chart-${color})`} stopOpacity={0} />
                 </linearGradient>
             </defs>
-            <YAxis width={0} visibility="hidden" domain={([min, max]) => [min - (max - min) * 0.1, max]} />
-            <Area
-                type="monotone" dataKey={dataKey} dot={false} activeDot={false}
+            <XAxis height={0} visibility="hidden" dataKey="x" domain={([min, max]) => [min, max]} />
+            <YAxis width={0} visibility="hidden" dataKey="y" domain={([min, max]) => [min - (max - min) * 0.1, max]} />
+            <Area 
+                type="monotone" dataKey="y" dot={false} activeDot={false} 
                 isAnimationActive={false}
                 stroke={`var(--chart-${color})`} strokeWidth={1.2}
                 fill={`url(#chart-fill-${key})`}
