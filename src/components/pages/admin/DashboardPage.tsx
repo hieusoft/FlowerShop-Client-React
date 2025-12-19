@@ -183,7 +183,7 @@ export default function DashboardPage() {
 
     return (
         <DashboardLayout breadcrumb={["Admin", "Overview"]}>
-            {/* <h2 className="font-heading text-3xl">Notifications</h2>
+            <h2 className="font-heading text-3xl">Notifications</h2>
             <Card className="my-4 py-4 -mx-4 border-x-0 rounded-none">
                 <CardDescription className="text-center">
                     No recent notifications.
@@ -345,19 +345,7 @@ export default function DashboardPage() {
                 </CarouselContent>
                 <CarouselPrevious />
                 <CarouselNext />
-            </Carousel> */}
-            <SidebarProvider
-            >
-                <SidebarInset>
-                    <div className="flex flex-1 flex-col">
-                        <div className="@container/main flex flex-1 flex-col gap-2">
-                            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-                                <SectionCards />
-                            </div>
-                        </div>
-                    </div>
-                </SidebarInset>
-            </SidebarProvider>
+            </Carousel>
         </DashboardLayout>
     )
 }
