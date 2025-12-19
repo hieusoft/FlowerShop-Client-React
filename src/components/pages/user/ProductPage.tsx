@@ -1,84 +1,98 @@
-"use client";
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { toast } from "sonner";
-import ProductService from "@/lib/api/ProductService";
-import OccasionService from "@/lib/api/OccasionService";
-import { SubOccasion } from "@/models/occasion";
-import { CartItem } from "@/models/cart";
+"use client"
 
-// Import components
-import ProductImages from "@/components/blocks/product/ProductImages";
-import ProductInfo from "@/components/blocks/product/ProductInfo";
-import ProductOptions from "@/components/blocks/product/ProductOptions";
-import QuantitySelector from "@/components/blocks/product/QuantitySelector";
-import ActionButtons from "@/components/blocks/product/ActionButtons";
-import ProductFeatures from "@/components/blocks/product/ProductFeatures";
-import ProductTabs from "@/components/blocks/product/ProductTabs";
-import LoadingSkeleton from "@/components/blocks/product/LoadingSkeleton";
-import ProductNotFound from "@/components/blocks/product/ProductNotFound";
+import { useState, useEffect } from "react"
+import { useParams, useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { ArrowLeft } from "lucide-react"
 
-// Import UI components
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import ProductService from "@/lib/api/ProductService"
+import OccasionService from "@/lib/api/OccasionService"
+import { CartItem } from "@/models/cart"
+
+import ProductImages from "@/components/blocks/product/ProductImages"
+import ProductInfo from "@/components/blocks/product/ProductInfo"
+import ProductOptions from "@/components/blocks/product/ProductOptions"
+import QuantitySelector from "@/components/blocks/product/QuantitySelector"
+import ActionButtons from "@/components/blocks/product/ActionButtons"
+import ProductFeatures from "@/components/blocks/product/ProductFeatures"
+import ProductTabs from "@/components/blocks/product/ProductTabs"
+import LoadingSkeleton from "@/components/blocks/product/LoadingSkeleton"
+import ProductNotFound from "@/components/blocks/product/ProductNotFound"
+
+import { Button } from "@/components/ui/button"
+
+interface CheckoutData {
+  subtotal: number
+  shippingFee: number
+  discount: number
+  tax: number
+  total: number
+  couponCode: string
+  couponDetails: any | null
+  selectedCount: number
+  totalItems: number
+  cartItems: CartItem[]
+  timestamp: string
+}
 
 export default function ProductPage() {
-  const router = useRouter();
-  const { occasion, suboccasion, id } = useParams();
-  
-  const [product, setProduct] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [quantity, setQuantity] = useState(1);
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
-  const [isFavorite, setIsFavorite] = useState(false);
+  const router = useRouter()
+  const { occasion, suboccasion, id } = useParams()
 
-useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                setLoading(true);
+  const [product, setProduct] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [quantity, setQuantity] = useState(1)
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(
+    {}
+  )
+  const [isFavorite, setIsFavorite] = useState(false)
 
-                if (!id || !suboccasion || Array.isArray(suboccasion)) {
-                    setProduct(null);
-                    return;
-                }
-                const res = await ProductService.fromId(id as string);
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true)
 
-        
-                const encodedOccasion = encodeURIComponent(occasion as string);
-                const occasionRes = await OccasionService.fromId(encodedOccasion);
+        if (!id || !suboccasion || Array.isArray(suboccasion)) {
+          setProduct(null)
+          return
+        }
 
-                if (!res.data || !res.data.subOccasionId || !res.data.subOccasionId.name) {
-                    setProduct(null);
-                    return;
-                }
+        const productRes = await ProductService.fromId(id as string)
+        const occasionRes = await OccasionService.fromId(
+          encodeURIComponent(occasion as string)
+        )
 
-                const occasionSubOccasions = occasionRes.data?.subOccasions || [];
-                console.log(occasionRes);
+        if (
+          !productRes.data ||
+          !productRes.data.subOccasionId?.name
+        ) {
+          setProduct(null)
+          return
+        }
 
-                const decodedSuboccasion = decodeURIComponent(suboccasion as string);
+        const decodedSuboccasion = decodeURIComponent(suboccasion as string)
+        const subOccasions = occasionRes.data?.subOccasions || []
 
-                const foundSubOccasion = occasionSubOccasions.find(
-                    (subOcc: any) => subOcc.name.toLowerCase() === decodedSuboccasion.toLowerCase()
-                );
+        const validSubOccasion = subOccasions.find(
+          (s: any) =>
+            s.name.toLowerCase() === decodedSuboccasion.toLowerCase()
+        )
 
-                const isNameMatch = res.data.subOccasionId.name.toLowerCase() === decodedSuboccasion.toLowerCase();
-                const isValid = isNameMatch && !!foundSubOccasion;
+        const isValid =
+          productRes.data.subOccasionId.name.toLowerCase() ===
+            decodedSuboccasion.toLowerCase() && !!validSubOccasion
 
-                if (!isValid) {
-                    setProduct(null);
-                } else {
-                    setProduct(res.data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch product:", error);
-                setProduct(null);
-            } finally {
-                setLoading(false);
-            }
-        };
+        setProduct(isValid ? productRes.data : null)
+      } catch {
+        setProduct(null)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-        fetchProduct();
-    }, [id, suboccasion, occasion]);
+    fetchProduct()
+  }, [id, suboccasion, occasion])
+
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -86,80 +100,114 @@ useEffect(() => {
           title: product.name,
           text: product.description,
           url: window.location.href,
-        });
-      } catch (error) {
-        console.error('Error sharing:', error);
-      }
+        })
+      } catch {}
     } else {
-      navigator.clipboard.writeText(window.location.href);
-      toast.info('Link copied to clipboard!', {
-        description: 'Product link has been copied.',
-      });
+      navigator.clipboard.writeText(window.location.href)
+      toast.info("Link copied", {
+        description: "Product link copied to clipboard",
+      })
     }
-  };
+  }
 
   const handleAddToCart = () => {
-    if (!product) return;
+    if (!product) return
 
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const existingIndex = cart.findIndex(
-      (item: CartItem) => item.id === product.id
-    );
+    const cart: CartItem[] = JSON.parse(
+      localStorage.getItem("cart") || "[]"
+    )
 
-    if (existingIndex !== -1) {
-      cart[existingIndex].quantity += quantity;
+    const index = cart.findIndex(item => item.id === product.id)
+
+    if (index !== -1) {
+      cart[index].quantity += quantity
     } else {
       cart.push({
         id: product.id,
         name: product.name,
         price: product.price,
         image: product.images?.[0],
-        quantity: quantity,
+        quantity,
         suboccasion: {
           id: product.subOccasionId?.id,
           name: product.subOccasionId?.name,
           occasionId: product.subOccasionId?.occasionId,
         },
-        
-      });
+      })
     }
 
-    localStorage.setItem("cart", JSON.stringify(cart));
-    setQuantity(1);
-    
+    localStorage.setItem("cart", JSON.stringify(cart))
+    setQuantity(1)
+
     toast.success("Added to cart", {
       description: `${product.name} x${quantity}`,
       action: {
         label: "View Cart",
         onClick: () => router.push("/cart"),
       },
-    });
-    
-    window.dispatchEvent(new Event("cartUpdated"));
-  };
+    })
+
+    window.dispatchEvent(new Event("cartUpdated"))
+  }
+
+  const calculateCheckoutData = (
+    product: any,
+    quantity: number
+  ): CheckoutData => {
+    const subtotal = product.price * quantity
+    const shippingFee = 2
+    const tax = subtotal * 0.08
+    const total = subtotal + shippingFee + tax
+
+    return {
+      subtotal,
+      shippingFee,
+      discount: 0,
+      tax,
+      total,
+      couponCode: "",
+      couponDetails: null,
+      selectedCount: 1,
+      totalItems: quantity,
+      cartItems: [
+        {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.images?.[0],
+          quantity,
+          suboccasion: {
+            id: product.subOccasionId?.id,
+            name: product.subOccasionId?.name,
+            occasionId: product.subOccasionId?.occasionId,
+          },
+        },
+      ],
+      timestamp: new Date().toISOString(),
+    }
+  }
 
   const handleBuyNow = () => {
-    handleAddToCart();
-    router.push("/checkout");
-  };
+    if (!product) return
 
-  const images = product?.images?.map((img: string) => 
-    `http://54.254.156.167:8080${img}`
-  ) || [];
-
-  if (loading) {
-    return <LoadingSkeleton />;
+    handleAddToCart()
+    const checkoutData = calculateCheckoutData(product, quantity)
+    localStorage.setItem("checkoutData", JSON.stringify(checkoutData))
+    router.push("/checkout")
   }
 
-  if (!product) {
-    return <ProductNotFound />;
-  }
+  const images =
+    product?.images?.map(
+      (img: string) => `http://54.254.156.167:8080${img}`
+    ) || []
+
+  if (loading) return <LoadingSkeleton />
+  if (!product) return <ProductNotFound />
 
   return (
-    <div className="container mx-auto py-8 px-4 md:py-12 max-w-7xl">
-      {/* Back Button & Breadcrumb */}
+    <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12">
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
+        <div className="mb-4 flex items-center gap-3">
           <Button
             variant="outline"
             size="icon"
@@ -168,17 +216,18 @@ useEffect(() => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
+
           <nav className="text-sm text-muted-foreground">
             <ol className="flex items-center space-x-2">
-              <li className="hover:text-primary cursor-pointer transition-colors">
+              <li className="cursor-pointer transition-colors hover:text-primary">
                 Home
               </li>
               <li>›</li>
-              <li className="hover:text-primary cursor-pointer transition-colors">
+              <li className="cursor-pointer transition-colors hover:text-primary">
                 {product.subOccasionId?.occasionId?.name || "Products"}
               </li>
               <li>›</li>
-              <li className="hover:text-primary cursor-pointer transition-colors">
+              <li className="cursor-pointer transition-colors hover:text-primary">
                 {product.subOccasionId?.name || "Category"}
               </li>
               <li>›</li>
@@ -190,8 +239,7 @@ useEffect(() => {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-        {/* Left Column - Product Images */}
+      <div className="flex flex-col gap-8 lg:flex-row lg:gap-12">
         <ProductImages
           images={images}
           productName={product.name}
@@ -200,8 +248,7 @@ useEffect(() => {
           onShare={handleShare}
         />
 
-        {/* Right Column - Product Details */}
-        <div className="lg:w-1/2 space-y-8">
+        <div className="space-y-8 lg:w-1/2">
           <ProductInfo
             name={product.name}
             category={product.subOccasionId?.name}
@@ -210,35 +257,33 @@ useEffect(() => {
             description={product.description}
           />
 
-          {/* Product Options */}
-          {product.options && product.options.length > 0 && (
+          {product.options?.length > 0 && (
             <ProductOptions
               options={product.options}
               selectedOptions={selectedOptions}
-              onOptionChange={(optionId, value) =>
-                setSelectedOptions(prev => ({ ...prev, [optionId]: value }))
+              onOptionChange={(id, value) =>
+                setSelectedOptions(prev => ({
+                  ...prev,
+                  [id]: value,
+                }))
               }
             />
           )}
 
-          {/* Quantity Selector */}
           <QuantitySelector
             quantity={quantity}
-            onIncrement={() => setQuantity(prev => prev + 1)}
-            onDecrement={() => setQuantity(prev => (prev > 1 ? prev - 1 : 1))}
+            onIncrement={() => setQuantity(q => q + 1)}
+            onDecrement={() => setQuantity(q => (q > 1 ? q - 1 : 1))}
             max={product.stock || 99}
           />
 
-          {/* Action Buttons */}
           <ActionButtons
             onAddToCart={handleAddToCart}
             onBuyNow={handleBuyNow}
           />
 
-          {/* Features Grid */}
           <ProductFeatures />
 
-          {/* Tabs */}
           <ProductTabs
             description={product.description}
             productId={product.id}
@@ -248,5 +293,5 @@ useEffect(() => {
         </div>
       </div>
     </div>
-  );
+  )
 }
