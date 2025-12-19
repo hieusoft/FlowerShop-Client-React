@@ -13,9 +13,13 @@ import {
 } from "../../ui/navigation-menu";
 import { Button } from "../../ui/button";
 import {
+  Building2Icon,
   CalendarIcon,
+  InfoIcon,
+  MailCheckIcon,
   MenuIcon,
   MoonIcon,
+  PhoneCallIcon,
   SearchIcon,
   Settings2Icon,
   ShoppingBasketIcon,
@@ -93,9 +97,9 @@ export function HeaderClient({ occasions }: { occasions: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-   
-      fetchNotifications();
-  
+
+    fetchNotifications();
+
   }, [currentUser]);
 
   useEffect(() => {
@@ -208,6 +212,36 @@ export function HeaderClient({ occasions }: { occasions: React.ReactNode }) {
                   <NavigationMenuContent>{occasions}</NavigationMenuContent>
                 </NavigationMenuItem>
 
+                <NavigationMenuItem>
+                  <Link
+                    href="/contactus"
+                    className={cn(
+                      "rounded-full transition hover:bg-accent",
+                      isMobile
+                        ? "size-10 flex items-center justify-center"
+                        : "px-4 py-2 text-sm font-medium"
+                    )}
+                  >
+                    {isMobile ? <PhoneCallIcon className="size-5" /> : "Contact Us"}
+                  </Link>
+                </NavigationMenuItem>
+
+                <NavigationMenuItem>
+                  <Link
+                    href="/aboutus"
+                    className={cn(
+                      "rounded-full transition hover:bg-accent",
+                      isMobile
+                        ? "size-10 flex items-center justify-center"
+                        : "px-4 py-2 text-sm font-medium"
+                    )}
+                  >
+                    {isMobile ? <InfoIcon className="size-5" /> : "About Us"}
+                  </Link>
+                </NavigationMenuItem>
+
+
+
                 <span className="grow"></span>
                 <HeaderSearchTrigger>
                   <Button
@@ -271,7 +305,6 @@ export function HeaderClient({ occasions }: { occasions: React.ReactNode }) {
                     )}
                   </Link>
 
-                  {/* DROPDOWN PREVIEW */}
                   <NavigationMenuContent>
                     <div className="flex flex-col md:flex-row md:justify-end md:text-end gap-4 w-full">
                       <div className="flex flex-col">

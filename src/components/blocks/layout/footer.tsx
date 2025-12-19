@@ -124,7 +124,7 @@ export function Footer({}) {
                         </div>
                         <div className="flex flex-col items-stretch gap-2">
                             <h4 className="font-heading text-xl">About us</h4>
-                            <Link href="/">About us</Link>
+                            <Link href="/aboutus">About us</Link>
                             <Link href="/">FAQ</Link>
                             <Link href="/">Hiring</Link>
                         </div>

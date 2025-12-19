@@ -274,9 +274,9 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-              {section.data.slice(0, 10).map((product: any) => (
+              {section.data.slice(0, 10).map((product: any, index) => (
                 <ProductCard
-                  key={product._id}
+                  key={index}
                   product={product}
                   occasion={
                     product.subOccasionId?.occasionId?.name || "all"
