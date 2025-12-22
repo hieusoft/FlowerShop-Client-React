@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import ProgressSteps from "@/components/blocks/checkout/ProgressSteps";
 import CheckoutForm from "@/components/blocks/checkout/CheckoutForm";
 import OrderSummary from "@/components/blocks/checkout/OrderSummary";
@@ -32,6 +33,8 @@ interface RecipientCreateDTO {
 type PaymentStatus = "idle" | "processing" | "success" | "failed";
 
 export default function CheckoutPage() {
+  const router = useRouter();
+
   const [step, setStep] = useState(1);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("idle");
   const [orderNumber, setOrderNumber] = useState("");
@@ -40,8 +43,7 @@ export default function CheckoutPage() {
   const [couponError, setCouponError] = useState("");
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const delay = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
+
   const [formData, setFormData] = useState<CheckoutFormData>({
     phone: "",
     fullName: "",
@@ -61,6 +63,16 @@ export default function CheckoutPage() {
     cartItems: [],
     couponCode: null,
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem("auth-access-token");
+    if (!token) {
+      router.replace("/login");
+    }
+  }, [router]);
+
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
 
   const showAlert = (message: string) => {
     setAlertMessage(message);
@@ -118,14 +130,13 @@ export default function CheckoutPage() {
   const handlePrevStep = () => {
     setStep(step - 1);
   };
+
   const removeOrderedItemsFromCart = (orderedItems: any[]) => {
     const rawCart = localStorage.getItem("cart");
     if (!rawCart) return;
 
     const cart = JSON.parse(rawCart);
-
-    const orderedIds = orderedItems.map(item => item.id);
-
+    const orderedIds = orderedItems.map((item) => item.id);
     const newCart = cart.filter(
       (item: any) => !orderedIds.includes(item.id)
     );
@@ -143,18 +154,15 @@ export default function CheckoutPage() {
       return;
     }
 
-    
     setPaymentStatus("processing");
 
     try {
-      
       const raw = localStorage.getItem("checkoutData");
       const checkoutData = raw ? JSON.parse(raw) : null;
 
       if (!checkoutData) {
         throw new Error("Checkout data not found.");
       }
-
 
       const finalData: CheckoutFormData = {
         paymentMethod: formData.paymentMethod,
@@ -177,7 +185,6 @@ export default function CheckoutPage() {
         acceptTerms: formData.acceptTerms,
       };
 
-     
       if (finalData.isNew) {
         const recipient_new: RecipientCreateDTO = {
           fullName: finalData.fullName,
@@ -189,43 +196,37 @@ export default function CheckoutPage() {
         await RecipientService.post(recipient_new);
       }
 
-      
       const order = await OrderService.post(finalData);
 
       if (!order || !order.data.order_id) {
-        throw new Error("Order creation failed or order ID not returned.");
+        throw new Error("Order creation failed.");
       }
+
       removeOrderedItemsFromCart(checkoutData.cartItems);
       localStorage.removeItem("checkoutData");
       window.dispatchEvent(new Event("cartUpdated"));
+
       await delay(3000);
-      const paymentResponse = await PaymentService.getByOrderId(order.data.order_id);
-      console.log(paymentResponse);
-      
+
+      const paymentResponse = await PaymentService.getByOrderId(
+        order.data.order_id
+      );
+
       const paymentUrl = paymentResponse?.data?.paymentUrl;
 
       if (paymentUrl) {
-
         window.open(paymentUrl, "_blank");
-        
-
-        
-        
       } else if (formData.paymentMethod === "cod") {
-
         setOrderNumber(order.data.order_code);
         setPaymentStatus("success");
       } else {
-        throw new Error("Payment method not supported or payment URL not available.");
+        throw new Error("Payment failed.");
       }
-
     } catch (error) {
-      console.error("Order error:", error);
       setPaymentStatus("failed");
       showAlert("Failed to place order. Please try again.");
     }
   };
-
 
   if (paymentStatus === "processing") {
     return <PaymentProcessing />;
@@ -268,9 +269,10 @@ export default function CheckoutPage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Notification</AlertDialogTitle>
-            <AlertDialogDescription>{alertMessage}</AlertDialogDescription>
+            <AlertDialogDescription>
+              {alertMessage}
+            </AlertDialogDescription>
           </AlertDialogHeader>
-
           <AlertDialogFooter>
             <AlertDialogAction onClick={() => setAlertOpen(false)}>
               OK

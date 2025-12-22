@@ -263,9 +263,9 @@ export default function ShopPage() {
                 ) : (
                     <>
                         <div className="w-full grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
-                            {bouquets.map((bouquet, index) => (
+                            {bouquets.map((bouquet) => (
                                 <ProductCard
-                                    key={index}
+                                    key={bouquet.id}
                                     product={bouquet}
                                     occasion={occasion as string}
                                 />

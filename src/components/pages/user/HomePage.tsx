@@ -274,9 +274,9 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-              {section.data.slice(0, 10).map((product: any, index) => (
+              {section.data.slice(0, 10).map((product: any) => (
                 <ProductCard
-                  key={index}
+                  key={product.id}
                   product={product}
                   occasion={
                     product.subOccasionId?.occasionId?.name || "all"
@@ -288,7 +288,7 @@ export default function HomePage() {
         </section>
       ))}
 
-      {/* TESTIMONIALS */}
+     
       <section className="py-12 bg-gray-50">
         <div className="container mx-auto px-4 grid md:grid-cols-3 gap-6">
           {testimonials.map((t) => (
